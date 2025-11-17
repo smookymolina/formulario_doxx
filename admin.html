@@ -270,6 +270,23 @@
             transform: translateY(-1px);
         }
 
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-delete:hover {
+            background: #c82333;
+            transform: translateY(-1px);
+        }
+
         /* ===== MODAL ===== */
         .modal-overlay {
             position: fixed;
@@ -553,6 +570,11 @@
             </div>
 
             <div class="chart-card">
+                <h3>📚 Respuestas por Programa</h3>
+                <canvas id="dashboardProgramaChart"></canvas>
+            </div>
+
+            <div class="chart-card">
                 <h3>🔔Últimas Respuestas</h3>
                 <div id="ultimasRespuestas" class="loading">
                     <div class="spinner"></div>
@@ -561,7 +583,7 @@
             </div>
 
             <div class="chart-card">
-                <h3>🎓
+                <h3>🤸 Top Actividades</h3>
                 <div id="topActividades"></div>
             </div>
         </div>
@@ -634,6 +656,9 @@
 
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <!-- Auth JS -->
     <script src="js/auth.js"></script>

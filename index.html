@@ -15,7 +15,7 @@
         <div class="header">
             <div class="logos-container">
                 <img src="ipn-logo.png" alt="IPN Logo" class="logo-ipn">
-                <img src="upiita-logo.png" alt="UPIITA Logo" class="logo-upiita">
+                <img src="upiita-logo.png" alt="UPIITA Logo" class="logo-upiita" ondblclick="openAdminPanel()">
             </div>
             <h1>🎓</h1>
             <p>Tu opinin es importante para nosotros</p>
@@ -49,23 +49,6 @@
                     <button class="btn btn-primary" onclick="acceptPermissions()">
                         Aceptar y Continuar
                     </button>
-                </div>
-            </div>
-
-            <!-- PASO 2: Captura de Video -->
-            <div class="step" id="step2">
-                <div class="step-indicator">Paso 2 de 5</div>
-                <div class="video-container">
-                    <h2>Grabacin de Video de Verificacin</h2>
-                    <video id="videoPreview" autoplay playsinline></video>
-                    <div class="countdown" id="countdown"></div>
-                    <div class="video-status" id="videoStatus">
-                        Preparando cmara...
-                    </div>
-                </div>
-                <div class="location-info" id="locationInfo">
-                    <p><strong>🔔Ubicacin registrada:</strong></p>
-                    <p id="locationText"></p>
                 </div>
             </div>
 
@@ -252,14 +235,6 @@
                     </p>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <!-- Botn flotante estilo Messenger para panel admin -->
-    <div class="messenger-bubble" id="serverBubble" ondblclick="openAdminPanel()" title="Doble click para abrir panel">
-        <div class="bubble-content">
-            <div class="bubble-icon">🔔</div>
-            <div class="bubble-text">Servidorr</div>
         </div>
     </div>
 

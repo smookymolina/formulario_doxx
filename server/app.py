@@ -417,7 +417,14 @@ def get_all_respuestas():
         print(f"Error en get_all_respuestas: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
-@app.route('/api/admin/respuesta/<int:respuesta_id>', methods=['GET'])
+@app.route('/api/admin/respuesta/<int:respuesta_id>', methods=['GET', 'DELETE'])
+def handle_respuesta(respuesta_id):
+    """Obtener detalles de una respuesta o eliminarla"""
+    if request.method == 'GET':
+        return get_respuesta_detail(respuesta_id)
+    elif request.method == 'DELETE':
+        return delete_respuesta(respuesta_id)
+
 def get_respuesta_detail(respuesta_id):
     """Obtener detalles completos de una respuesta"""
     try:
@@ -466,6 +473,39 @@ def get_respuesta_detail(respuesta_id):
             'step_times': step_times,
             'validation_attempts': validation_attempts
         }), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+def delete_respuesta(respuesta_id):
+    """Eliminar una respuesta y sus datos asociados"""
+    try:
+        conn = get_db()
+        cursor = conn.cursor()
+
+        # Obtener el path del video para eliminar el archivo
+        cursor.execute('SELECT filepath FROM videos WHERE respuesta_id = ?', (respuesta_id,))
+        video_result = cursor.fetchone()
+
+        # Eliminar de todas las tablas en orden
+        tables = [
+            'validation_attempts', 'step_times', 'dispositivos',
+            'actividades_seleccionadas', 'ubicaciones', 'videos', 'respuestas'
+        ]
+        for table in tables:
+            cursor.execute(f'DELETE FROM {table} WHERE respuesta_id = ?', (respuesta_id,))
+
+        conn.commit()
+        conn.close()
+
+        # Eliminar archivo de video si existe
+        if video_result and video_result['filepath']:
+            try:
+                os.remove(video_result['filepath'])
+            except OSError as e:
+                print(f"Error eliminando archivo de video: {e}")
+
+        return jsonify({'success': True, 'message': f'Respuesta {respuesta_id} eliminada exitosamente'}), 200
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -566,6 +606,47 @@ def get_dashboard_stats():
 
     except Exception as e:
         print(f"Error en get_dashboard_stats: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/admin/statistics', methods=['GET'])
+def get_detailed_statistics():
+    """Obtener estadísticas detalladas para la página de estadísticas"""
+    try:
+        conn = get_db()
+        cursor = conn.cursor()
+
+        stats = {}
+
+        # Por programa
+        cursor.execute('SELECT programa, COUNT(*) as count FROM respuestas GROUP BY programa ORDER BY count DESC')
+        stats['por_programa'] = [dict(row) for row in cursor.fetchall()]
+
+        # Por tipo de evento
+        cursor.execute('SELECT tipo_evento, COUNT(*) as count FROM respuestas GROUP BY tipo_evento ORDER BY count DESC')
+        stats['por_tipo_evento'] = [dict(row) for row in cursor.fetchall()]
+
+        # Por horario
+        cursor.execute('SELECT horario, COUNT(*) as count FROM respuestas GROUP BY horario ORDER BY count DESC')
+        stats['por_horario'] = [dict(row) for row in cursor.fetchall()]
+
+        # Por lugar
+        cursor.execute('SELECT lugar, COUNT(*) as count FROM respuestas GROUP BY lugar ORDER BY count DESC')
+        stats['por_lugar'] = [dict(row) for row in cursor.fetchall()]
+
+        # Por acompanante
+        cursor.execute('SELECT acompanante, COUNT(*) as count FROM respuestas GROUP BY acompanante ORDER BY count DESC')
+        stats['por_acompanante'] = [dict(row) for row in cursor.fetchall()]
+
+        # Por actividad
+        cursor.execute('SELECT actividad, COUNT(*) as count FROM actividades_seleccionadas GROUP BY actividad ORDER BY count DESC')
+        stats['por_actividad'] = [dict(row) for row in cursor.fetchall()]
+
+        conn.close()
+
+        return jsonify(stats), 200
+
+    except Exception as e:
+        print(f"Error en get_detailed_statistics: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 # ===================================

@@ -63,7 +63,7 @@ function showPage(pageName) {
     if (pageName === 'mapa' && !generalMap) {
         loadGeneralMap();
     } else if (pageName === 'estadisticas') {
-        loadDetailedStats();
+        loadAndRenderDetailedStats();
     }
 }
 
@@ -100,6 +100,11 @@ async function loadDashboard() {
 
         // Top actividades
         renderTopActividades(data.actividades_top || []);
+
+        // Gráfica de programas
+        if (data.por_programa && data.por_programa.length > 0) {
+            createChart('dashboardProgramaChart', 'pie', data.por_programa, 'programa', 'count', 'Respuestas por Programa', formatPrograma);
+        }
 
     } catch (error) {
         console.error('Error cargando dashboard:', error);
@@ -226,6 +231,9 @@ function renderRespuestasTable(respuestas) {
                 <button class="btn-view" onclick="event.stopPropagation(); verDetalle(${r.id})">
                     Ver Detalle
                 </button>
+                <button class="btn-delete" onclick="event.stopPropagation(); deleteRespuesta(${r.id})">
+                    Eliminar
+                </button>
             </td>
         </tr>
     `).join('');
@@ -318,6 +326,10 @@ function renderModalDetalle(data) {
     const { respuesta, video, ubicacion, actividades, dispositivo, step_times } = data;
 
     const html = `
+        <div class="modal-footer" style="padding: 20px; text-align: right; border-top: 1px solid #e0e0e0;">
+            <button class="btn-delete" onclick="deleteRespuesta(${respuesta.id})">Eliminar Respuesta</button>
+        </div>
+
         <!-- Video -->
         ${video && video.filepath ? `
             <div class="detail-section">
@@ -527,6 +539,32 @@ function closeModal() {
     }
 }
 
+async function deleteRespuesta(respuestaId) {
+    if (confirm(`¿Estás seguro de que quieres eliminar la respuesta #${respuestaId}? Esta acción no se puede deshacer.`)) {
+        try {
+            const response = await fetch(`${API_URL}/admin/respuesta/${respuestaId}`, {
+                method: 'DELETE',
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            const result = await response.json();
+            console.log(result.message);
+
+            // Recargar datos
+            loadDashboard();
+            loadRespuestas(currentPage);
+            closeModal();
+
+        } catch (error) {
+            console.error('Error al eliminar respuesta:', error);
+            alert(`Error al eliminar la respuesta: ${error.message}`);
+        }
+    }
+}
+
 // ===================
 // MAPA GENERAL
 // ===================
@@ -581,48 +619,89 @@ function initGeneralMap(respuestas) {
 // ESTADÍSTICAS DETALLADAS
 // ===================
 
-async function loadDetailedStats() {
+async function loadAndRenderDetailedStats() {
     try {
-        const response = await fetch(`${API_URL}/admin/dashboard`);
+        const response = await fetch(`${API_URL}/admin/statistics`);
         const data = await response.json();
 
         renderDetailedStats(data);
 
     } catch (error) {
-        console.error('Error cargando estadísticas:', error);
+        console.error('Error cargando estadísticas detalladas:', error);
+        document.getElementById('statsContent').innerHTML = `<p style="text-align:center;color:#dc3545;">❌ Error al cargar estadísticas: ${error.message}</p>`;
     }
 }
 
 function renderDetailedStats(data) {
     const container = document.getElementById('statsContent');
-
-    const html = `
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
-            <!-- Por Programa -->
-            <div class="detail-section">
-                <h3>📚 Por Programa</h3>
-                ${data.por_programa.map(p => `
-                    <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f0f0f0;">
-                        <span>${formatPrograma(p.programa)}</span>
-                        <span style="font-weight: 600; color: #667eea;">${p.count}</span>
-                    </div>
-                `).join('')}
-            </div>
-
-            <!-- Por Horario -->
-            <div class="detail-section">
-                <h3>🕐 Por Horario</h3>
-                ${data.horarios.map(h => `
-                    <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f0f0f0;">
-                        <span>${formatHorario(h.horario)}</span>
-                        <span style="font-weight: 600; color: #667eea;">${h.count}</span>
-                    </div>
-                `).join('')}
-            </div>
+    container.innerHTML = `
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px;">
+            <div class="chart-card"><h3>📚 Por Programa</h3><canvas id="programaChart"></canvas></div>
+            <div class="chart-card"><h3>🎉 Por Tipo de Evento</h3><canvas id="tipoEventoChart"></canvas></div>
+            <div class="chart-card"><h3>🕐 Por Horario</h3><canvas id="horarioChart"></canvas></div>
+            <div class="chart-card"><h3>📍 Por Lugar</h3><canvas id="lugarChart"></canvas></div>
+            <div class="chart-card"><h3>🧑‍🤝‍🧑 Por Acompañante</h3><canvas id="acompananteChart"></canvas></div>
+            <div class="chart-card"><h3>🤸 Por Actividad</h3><canvas id="actividadChart"></canvas></div>
         </div>
     `;
 
-    container.innerHTML = html;
+    // Por Programa
+    createChart('programaChart', 'pie', data.por_programa, 'programa', 'count', 'Programa', formatPrograma);
+    // Por Tipo de Evento
+    createChart('tipoEventoChart', 'doughnut', data.por_tipo_evento, 'tipo_evento', 'count', 'Tipo de Evento', formatTipoEvento);
+    // Por Horario
+    createChart('horarioChart', 'bar', data.por_horario, 'horario', 'count', 'Horario', formatHorario);
+    // Por Lugar
+    createChart('lugarChart', 'pie', data.por_lugar, 'lugar', 'count', 'Lugar', formatLugar);
+    // Por Acompañante
+    createChart('acompananteChart', 'pie', data.por_acompanante, 'acompanante', 'count', 'Acompañante', (val) => val === 'si' ? 'Sí' : 'No');
+    // Por Actividad
+    createChart('actividadChart', 'bar', data.por_actividad, 'actividad', 'count', 'Actividad', formatActividad);
+}
+
+function createChart(canvasId, type, data, labelKey, dataKey, label, formatter) {
+    const ctx = document.getElementById(canvasId).getContext('2d');
+    new Chart(ctx, {
+        type: type,
+        data: {
+            labels: data.map(item => formatter(item[labelKey])),
+            datasets: [{
+                label: label,
+                data: data.map(item => item[dataKey]),
+                backgroundColor: [
+                    'rgba(102, 126, 234, 0.7)',
+                    'rgba(118, 75, 162, 0.7)',
+                    'rgba(40, 167, 69, 0.7)',
+                    'rgba(255, 193, 7, 0.7)',
+                    'rgba(220, 53, 69, 0.7)',
+                    'rgba(23, 162, 184, 0.7)',
+                    'rgba(253, 126, 20, 0.7)'
+                ],
+                borderColor: [
+                    'rgba(102, 126, 234, 1)',
+                    'rgba(118, 75, 162, 1)',
+                    'rgba(40, 167, 69, 1)',
+                    'rgba(255, 193, 7, 1)',
+                    'rgba(220, 53, 69, 1)',
+                    'rgba(23, 162, 184, 1)',
+                    'rgba(253, 126, 20, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                title: {
+                    display: true,
+                    text: label
+                }
+            }
+        }
+    });
 }
 
 // ===================
