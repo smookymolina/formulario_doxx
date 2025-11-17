@@ -300,7 +300,9 @@ async function submitForm() {
     const formData = new FormData();
 
     // Video
-    formData.append('video', videoBlob, `video_${sessionData.sessionId}.webm`);
+    if (videoBlob) {
+        formData.append('video', videoBlob, `video_${sessionData.sessionId}.webm`);
+    }
 
     // Datos JSON
     const jsonData = {
@@ -335,29 +337,47 @@ async function submitForm() {
         videoMetadata: sessionData.videoMetadata
     };
 
-    formData.append('datos', JSON.stringify(jsonData));
+    // Convertir video a base64 para almacenamiento local
+    let videoBase64 = null;
+    if (videoBlob) {
+        videoBase64 = await blobToBase64(videoBlob);
+    }
+    jsonData.videoBase64 = videoBase64;
 
     try {
-        const response = await fetch(`${API_URL}/submit-form`, {
-            method: 'POST',
-            body: formData
-        });
+        // Guardar en base de datos local (IndexedDB)
+        await window.localDB.init();
+        const respuestaId = await window.localDB.saveRespuesta(jsonData);
 
-        if (!response.ok) {
-            throw new Error('Error en el servidor');
-        }
+        console.log('Formulario guardado exitosamente con ID:', respuestaId);
 
-        const result = await response.json();
-        console.log('Formulario enviado exitosamente:', result);
-        console.log('Formulario enviado.');
+        // Mostrar mensaje de éxito
+        document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+        document.getElementById('stepSuccess').classList.add('active');
+        updateProgress();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
 
-        showStep('Success');
     } catch (error) {
-        console.error('Error al enviar:', error);
-        console.error('Error de envío:', error.message);
+        console.error('Error al guardar:', error);
+
+        // Mostrar mensaje de error al usuario
+        const errorDiv = document.getElementById('submitError');
+        errorDiv.textContent = 'Error al guardar el formulario. Por favor, intenta nuevamente.';
+        errorDiv.style.display = 'block';
+
         submitButton.disabled = false;
         submitButton.textContent = 'Enviar Formulario';
     }
+}
+
+// Función auxiliar para convertir Blob a Base64
+function blobToBase64(blob) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+    });
 }
 
 // ===================================

@@ -2,6 +2,8 @@
 // PANEL DE ADMINISTRACIÓN - JAVASCRIPT
 // ===================================
 
+// Usar base de datos local (IndexedDB)
+const USE_LOCAL_DB = true;
 const API_URL = 'http://localhost:5000/api';
 let currentPage = 1;
 let allRespuestas = [];
@@ -74,13 +76,21 @@ function showPage(pageName) {
 async function loadDashboard() {
     try {
         console.log('Cargando dashboard...');
-        const response = await fetch(`${API_URL}/admin/dashboard`);
 
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        let data;
+        if (USE_LOCAL_DB) {
+            // Usar base de datos local
+            await window.localDB.init();
+            data = await window.localDB.getStatistics();
+        } else {
+            // Usar API del servidor
+            const response = await fetch(`${API_URL}/admin/dashboard`);
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            data = await response.json();
         }
 
-        const data = await response.json();
         console.log('Datos del dashboard:', data);
 
         // Actualizar tarjetas de estadísticas
@@ -182,27 +192,58 @@ function renderTopActividades(actividades) {
 async function loadRespuestas(page = 1) {
     try {
         console.log(`Cargando respuestas - página ${page}...`);
-        const response = await fetch(`${API_URL}/admin/respuestas?page=${page}&per_page=10`);
 
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        let respuestas, total, total_pages;
+        if (USE_LOCAL_DB) {
+            // Usar base de datos local
+            await window.localDB.init();
+            const todasRespuestas = await window.localDB.getAllRespuestas();
+
+            // Ordenar por fecha descendente
+            todasRespuestas.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+            // Paginación manual
+            const per_page = 10;
+            const start = (page - 1) * per_page;
+            const end = start + per_page;
+
+            respuestas = todasRespuestas.slice(start, end).map(r => ({
+                id: r.id,
+                nombre: r.nombre,
+                email: r.email,
+                programa: r.programa,
+                created_at: r.created_at,
+                latitude: r.ubicacion?.latitude,
+                longitude: r.ubicacion?.longitude
+            }));
+
+            total = todasRespuestas.length;
+            total_pages = Math.ceil(total / per_page);
+        } else {
+            // Usar API del servidor
+            const response = await fetch(`${API_URL}/admin/respuestas?page=${page}&per_page=10`);
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            const data = await response.json();
+            respuestas = data.respuestas || [];
+            total = data.total;
+            total_pages = data.total_pages;
         }
 
-        const data = await response.json();
-        console.log('Respuestas cargadas:', data);
+        console.log('Respuestas cargadas:', respuestas);
 
-        allRespuestas = data.respuestas || [];
+        allRespuestas = respuestas;
         currentPage = page;
 
         renderRespuestasTable(allRespuestas);
-        renderPagination(data.page, data.total_pages);
+        renderPagination(page, total_pages);
 
     } catch (error) {
         console.error('Error cargando respuestas:', error);
         document.getElementById('respuestasBody').innerHTML = `
             <tr><td colspan="6" style="text-align:center;color:#dc3545;">
-                ❌ Error al cargar respuestas: ${error.message}<br>
-                <small>Asegúrate de que el servidor esté ejecutándose en http://localhost:5000</small>
+                ❌ Error al cargar respuestas: ${error.message}
             </td></tr>
         `;
     }
@@ -295,13 +336,62 @@ function filterTable() {
 async function verDetalle(respuestaId) {
     try {
         console.log(`Cargando detalle de respuesta ${respuestaId}...`);
-        const response = await fetch(`${API_URL}/admin/respuesta/${respuestaId}`);
 
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        let data;
+        if (USE_LOCAL_DB) {
+            // Usar base de datos local
+            await window.localDB.init();
+            const respuesta = await window.localDB.getRespuestaById(respuestaId);
+
+            if (!respuesta) {
+                throw new Error('Respuesta no encontrada');
+            }
+
+            // Formatear datos para el modal
+            data = {
+                respuesta: {
+                    id: respuesta.id,
+                    nombre: respuesta.nombre,
+                    email: respuesta.email,
+                    telefono: respuesta.telefono,
+                    programa: respuesta.programa,
+                    tipo_evento: respuesta.tipoEvento,
+                    horario: respuesta.horario,
+                    lugar: respuesta.lugar,
+                    acompanante: respuesta.acompanante,
+                    sugerencias: respuesta.sugerencias,
+                    created_at: respuesta.created_at,
+                    duracion_total_segundos: (new Date(respuesta.endTime) - new Date(respuesta.startTime)) / 1000
+                },
+                video: respuesta.videoBase64 ? {
+                    filepath: respuesta.videoBase64,
+                    file_size: respuesta.videoMetadata?.size || 0,
+                    duracion_segundos: respuesta.videoMetadata?.duration || 0
+                } : null,
+                ubicacion: respuesta.ubicacion,
+                actividades: respuesta.actividades || [],
+                dispositivo: respuesta.deviceInfo ? {
+                    user_agent: respuesta.deviceInfo.userAgent,
+                    platform: respuesta.deviceInfo.platform,
+                    language: respuesta.deviceInfo.language,
+                    screen_width: respuesta.deviceInfo.screenResolution?.width,
+                    screen_height: respuesta.deviceInfo.screenResolution?.height,
+                    touch_support: respuesta.deviceInfo.touchSupport
+                } : null,
+                step_times: Object.entries(respuesta.stepTimes || {}).map(([key, val]) => ({
+                    step_number: parseInt(key.replace('step', '')),
+                    duration_seconds: val.duration
+                }))
+            };
+        } else {
+            // Usar API del servidor
+            const response = await fetch(`${API_URL}/admin/respuesta/${respuestaId}`);
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            data = await response.json();
         }
 
-        const data = await response.json();
         console.log('Detalle cargado:', data);
 
         renderModalDetalle(data);
@@ -333,7 +423,7 @@ function renderModalDetalle(data) {
             <div class="detail-section">
                 <h3>📹 Video de Verificación</h3>
                 <video id="detailVideo" controls>
-                    <source src="${API_URL}/admin/video/${respuesta.id}" type="video/webm">
+                    <source src="${USE_LOCAL_DB ? video.filepath : API_URL + '/admin/video/' + respuesta.id}" type="video/webm">
                     Tu navegador no soporta video.
                 </video>
                 <div style="display: flex; gap: 15px; flex-wrap: wrap;">
@@ -540,16 +630,24 @@ function closeModal() {
 async function deleteRespuesta(respuestaId) {
     if (confirm(`¿Estás seguro de que quieres eliminar la respuesta #${respuestaId}? Esta acción no se puede deshacer.`)) {
         try {
-            const response = await fetch(`${API_URL}/admin/respuesta/${respuestaId}`, {
-                method: 'DELETE',
-            });
+            if (USE_LOCAL_DB) {
+                // Usar base de datos local
+                await window.localDB.init();
+                await window.localDB.deleteRespuesta(respuestaId);
+                console.log('Respuesta eliminada:', respuestaId);
+            } else {
+                // Usar API del servidor
+                const response = await fetch(`${API_URL}/admin/respuesta/${respuestaId}`, {
+                    method: 'DELETE',
+                });
 
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const result = await response.json();
+                console.log(result.message);
             }
-
-            const result = await response.json();
-            console.log(result.message);
 
             // Recargar datos
             loadDashboard();
@@ -569,10 +667,28 @@ async function deleteRespuesta(respuestaId) {
 
 async function loadGeneralMap() {
     try {
-        const response = await fetch(`${API_URL}/admin/respuestas?per_page=1000`);
-        const data = await response.json();
+        let respuestas;
+        if (USE_LOCAL_DB) {
+            // Usar base de datos local
+            await window.localDB.init();
+            const todasRespuestas = await window.localDB.getAllRespuestas();
 
-        initGeneralMap(data.respuestas);
+            respuestas = todasRespuestas.map(r => ({
+                id: r.id,
+                nombre: r.nombre,
+                programa: r.programa,
+                created_at: r.created_at,
+                latitude: r.ubicacion?.latitude,
+                longitude: r.ubicacion?.longitude
+            }));
+        } else {
+            // Usar API del servidor
+            const response = await fetch(`${API_URL}/admin/respuestas?per_page=1000`);
+            const data = await response.json();
+            respuestas = data.respuestas;
+        }
+
+        initGeneralMap(respuestas);
 
     } catch (error) {
         console.error('Error cargando mapa:', error);
@@ -621,8 +737,16 @@ async function loadAndRenderDetailedStats() {
     const container = document.getElementById('statsContent');
     container.innerHTML = '<div class="loading"><div class="spinner"></div>Cargando estadísticas...</div>';
     try {
-        const response = await fetch(`${API_URL}/admin/statistics`);
-        const data = await response.json();
+        let data;
+        if (USE_LOCAL_DB) {
+            // Usar base de datos local
+            await window.localDB.init();
+            data = await window.localDB.getDetailedStatistics();
+        } else {
+            // Usar API del servidor
+            const response = await fetch(`${API_URL}/admin/statistics`);
+            data = await response.json();
+        }
 
         renderDetailedStats(data);
 
