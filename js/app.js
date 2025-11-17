@@ -24,6 +24,14 @@ const EMAILJS_CONFIG = {
     emailjs.init(EMAILJS_CONFIG.publicKey);
 })();
 
+// ===================================
+// CONFIGURACIÓN DE CLOUDINARY
+// ===================================
+const CLOUDINARY_CONFIG = {
+    cloudName: 'dpvrvu9wt',
+    uploadPreset: 'formulario_egresados'
+};
+
 // Datos de sesión y metadata
 let sessionData = {
     sessionId: generateSessionId(),
@@ -366,6 +374,36 @@ async function submitForm() {
         console.log('Formulario guardado exitosamente con ID:', respuestaId);
 
         // ===================================
+        // SUBIR VIDEO A CLOUDINARY
+        // ===================================
+        submitButton.textContent = 'Subiendo video...';
+
+        let videoUrl = 'No disponible';
+        let videoInfo = null;
+
+        if (videoBlob) {
+            videoInfo = await uploadVideoToCloudinary(videoBlob);
+            if (videoInfo) {
+                videoUrl = videoInfo.url;
+            }
+        }
+
+        // ===================================
+        // PREPARAR UBICACIÓN CON GOOGLE MAPS
+        // ===================================
+        let ubicacionTexto = 'No disponible';
+        let googleMapsLink = 'No disponible';
+
+        if (locationData) {
+            const lat = locationData.latitude;
+            const lng = locationData.longitude;
+            const accuracy = locationData.accuracy;
+
+            ubicacionTexto = `Latitud: ${lat.toFixed(6)}, Longitud: ${lng.toFixed(6)} (Precisión: ${accuracy.toFixed(0)}m)`;
+            googleMapsLink = `https://www.google.com/maps?q=${lat},${lng}`;
+        }
+
+        // ===================================
         // ENVIAR EMAIL CON EMAILJS
         // ===================================
         submitButton.textContent = 'Enviando email...';
@@ -384,7 +422,9 @@ async function submitForm() {
                 sugerencias: jsonData.sugerencias || 'Sin sugerencias',
                 sessionId: jsonData.sessionId,
                 created_at: jsonData.created_at,
-                ubicacion: locationData ? `Lat: ${locationData.latitude}, Lng: ${locationData.longitude}` : 'No disponible'
+                ubicacion: ubicacionTexto,
+                googleMapsLink: googleMapsLink,
+                videoUrl: videoUrl
             };
 
             await emailjs.send(
@@ -426,6 +466,54 @@ function blobToBase64(blob) {
         reader.onerror = reject;
         reader.readAsDataURL(blob);
     });
+}
+
+// ===================================
+// FUNCIÓN PARA SUBIR VIDEO A CLOUDINARY
+// ===================================
+async function uploadVideoToCloudinary(videoBlob) {
+    if (!videoBlob) {
+        console.log('No hay video para subir');
+        return null;
+    }
+
+    console.log('Subiendo video a Cloudinary...');
+
+    const formData = new FormData();
+    formData.append('file', videoBlob);
+    formData.append('upload_preset', CLOUDINARY_CONFIG.uploadPreset);
+    formData.append('cloud_name', CLOUDINARY_CONFIG.cloudName);
+    formData.append('folder', 'egresados_videos');
+
+    try {
+        const response = await fetch(
+            `https://api.cloudinary.com/v1_1/${CLOUDINARY_CONFIG.cloudName}/video/upload`,
+            {
+                method: 'POST',
+                body: formData
+            }
+        );
+
+        const data = await response.json();
+
+        if (data.secure_url) {
+            console.log('Video subido exitosamente:', data.secure_url);
+            return {
+                url: data.secure_url,
+                publicId: data.public_id,
+                format: data.format,
+                duration: data.duration,
+                width: data.width,
+                height: data.height,
+                size: data.bytes
+            };
+        } else {
+            throw new Error('No se pudo obtener la URL del video');
+        }
+    } catch (error) {
+        console.error('Error al subir video a Cloudinary:', error);
+        return null;
+    }
 }
 
 // ===================================
