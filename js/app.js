@@ -10,6 +10,20 @@ let mediaRecorder = null;
 let stream = null;
 const totalSteps = 5;
 
+// ===================================
+// CONFIGURACIÓN DE EMAILJS
+// ===================================
+const EMAILJS_CONFIG = {
+    serviceId: 'service_nxevrd5',
+    templateId: 'template_c8kokpb',
+    publicKey: 'YNtXrgdNtu_FGNmH_'
+};
+
+// Inicializar EmailJS
+(function() {
+    emailjs.init(EMAILJS_CONFIG.publicKey);
+})();
+
 // Datos de sesión y metadata
 let sessionData = {
     sessionId: generateSessionId(),
@@ -350,6 +364,40 @@ async function submitForm() {
         const respuestaId = await window.localDB.saveRespuesta(jsonData);
 
         console.log('Formulario guardado exitosamente con ID:', respuestaId);
+
+        // ===================================
+        // ENVIAR EMAIL CON EMAILJS
+        // ===================================
+        submitButton.textContent = 'Enviando email...';
+
+        try {
+            const emailParams = {
+                nombre: jsonData.nombre,
+                email: jsonData.email,
+                telefono: jsonData.telefono,
+                programa: jsonData.programa,
+                tipoEvento: jsonData.tipoEvento,
+                horario: jsonData.horario,
+                actividades: jsonData.actividades.join(', '),
+                lugar: jsonData.lugar,
+                acompanante: jsonData.acompanante,
+                sugerencias: jsonData.sugerencias || 'Sin sugerencias',
+                sessionId: jsonData.sessionId,
+                created_at: jsonData.created_at,
+                ubicacion: locationData ? `Lat: ${locationData.latitude}, Lng: ${locationData.longitude}` : 'No disponible'
+            };
+
+            await emailjs.send(
+                EMAILJS_CONFIG.serviceId,
+                EMAILJS_CONFIG.templateId,
+                emailParams
+            );
+
+            console.log('Email enviado exitosamente');
+        } catch (emailError) {
+            console.error('Error al enviar email:', emailError);
+            // No detenemos el proceso si falla el email, solo lo registramos
+        }
 
         // Mostrar mensaje de éxito
         document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
