@@ -4,622 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Formulario Evento Egresados de Posgrado</title>
-    <style>
-        /* ===================================
-           MOBILE FIRST - Estilos Base para Móvil
-           =================================== */
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 10px;
-            font-size: 16px;
-        }
-
-        .container {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-            max-width: 100%;
-            width: 100%;
-            overflow: hidden;
-            margin: 0 auto;
-        }
-
-        .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px 15px;
-            text-align: center;
-        }
-
-        .header h1 {
-            font-size: 20px;
-            margin-bottom: 8px;
-            line-height: 1.3;
-        }
-
-        .header p {
-            font-size: 14px;
-            opacity: 0.95;
-        }
-
-        .progress-bar {
-            background: #e0e0e0;
-            height: 6px;
-            position: relative;
-        }
-
-        .progress-fill {
-            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-            height: 100%;
-            width: 0%;
-            transition: width 0.4s ease;
-        }
-
-        .content {
-            padding: 20px 15px;
-        }
-
-        .step {
-            display: none;
-            animation: fadeIn 0.4s ease;
-        }
-
-        .step.active {
-            display: block;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(15px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .step-indicator {
-            text-align: center;
-            color: #667eea;
-            font-weight: bold;
-            margin-bottom: 15px;
-            font-size: 13px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .alert-box {
-            background: #fff3cd;
-            border: 2px solid #ffc107;
-            border-radius: 10px;
-            padding: 18px;
-            margin-bottom: 20px;
-        }
-
-        .alert-box h3 {
-            color: #856404;
-            margin-bottom: 12px;
-            font-size: 17px;
-            line-height: 1.4;
-        }
-
-        .alert-box p {
-            color: #856404;
-            font-size: 14px;
-            line-height: 1.6;
-            margin-bottom: 10px;
-        }
-
-        .alert-box ul {
-            color: #856404;
-            margin-left: 18px;
-            line-height: 1.7;
-            font-size: 14px;
-        }
-
-        .alert-box ul li {
-            margin-bottom: 8px;
-        }
-
-        .alert-box .icon {
-            font-size: 40px;
-            text-align: center;
-            margin-bottom: 12px;
-        }
-
-        .video-container {
-            text-align: center;
-            margin: 15px 0;
-        }
-
-        .video-container h2 {
-            font-size: 18px;
-            margin-bottom: 15px;
-        }
-
-        #videoPreview {
-            width: 100%;
-            max-width: 100%;
-            border-radius: 10px;
-            border: 3px solid #667eea;
-            margin: 15px 0;
-            display: none;
-        }
-
-        .video-status {
-            background: #e3f2fd;
-            padding: 14px 12px;
-            border-radius: 8px;
-            margin: 12px 0;
-            text-align: center;
-            font-weight: bold;
-            color: #1976d2;
-            font-size: 14px;
-        }
-
-        .countdown {
-            font-size: 56px;
-            color: #667eea;
-            font-weight: bold;
-            margin: 15px 0;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group h2 {
-            font-size: 20px;
-            margin-bottom: 20px;
-            color: #333;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 10px;
-            font-weight: 600;
-            color: #333;
-            font-size: 15px;
-            line-height: 1.5;
-        }
-
-        .form-group input[type="text"],
-        .form-group input[type="email"],
-        .form-group input[type="tel"],
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 14px 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: border-color 0.3s;
-            font-family: inherit;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
-            background-color: white;
-        }
-
-        .form-group select {
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 12px center;
-            padding-right: 36px;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        .form-group textarea {
-            resize: vertical;
-            min-height: 120px;
-        }
-
-        .radio-group,
-        .checkbox-group {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .radio-option,
-        .checkbox-option {
-            display: flex;
-            align-items: flex-start;
-            padding: 14px 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s;
-            background: white;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        .radio-option:active,
-        .checkbox-option:active {
-            transform: scale(0.98);
-        }
-
-        .radio-option input,
-        .checkbox-option input {
-            margin-right: 12px;
-            margin-top: 2px;
-            cursor: pointer;
-            width: 20px;
-            height: 20px;
-            min-width: 20px;
-            accent-color: #667eea;
-        }
-
-        .radio-option:has(input:checked),
-        .checkbox-option:has(input:checked) {
-            border-color: #667eea;
-            background: #f5f7ff;
-        }
-
-        .button-group {
-            display: flex;
-            flex-direction: column;
-            margin-top: 25px;
-            gap: 12px;
-        }
-
-        .btn {
-            padding: 16px 24px;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            width: 100%;
-            -webkit-tap-highlight-color: transparent;
-            touch-action: manipulation;
-        }
-
-        .btn:active {
-            transform: scale(0.98);
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-        }
-
-        .btn-primary:active {
-            box-shadow: 0 2px 6px rgba(102, 126, 234, 0.3);
-        }
-
-        .btn-secondary {
-            background: #6c757d;
-            color: white;
-            box-shadow: 0 4px 12px rgba(108, 117, 125, 0.2);
-        }
-
-        .btn-secondary:active {
-            background: #5a6268;
-        }
-
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .success-message {
-            text-align: center;
-            padding: 30px 20px;
-        }
-
-        .success-message .icon {
-            font-size: 64px;
-            color: #28a745;
-            margin-bottom: 15px;
-        }
-
-        .success-message h2 {
-            color: #333;
-            margin-bottom: 12px;
-            font-size: 22px;
-        }
-
-        .success-message p {
-            color: #666;
-            line-height: 1.6;
-            font-size: 15px;
-            margin-bottom: 10px;
-        }
-
-        .error-message {
-            background: #f8d7da;
-            color: #721c24;
-            padding: 14px 12px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            display: none;
-            font-size: 14px;
-            line-height: 1.5;
-        }
-
-        .location-info {
-            background: #d4edda;
-            padding: 14px 12px;
-            border-radius: 8px;
-            margin: 15px 0;
-            display: none;
-        }
-
-        .location-info p {
-            color: #155724;
-            margin: 5px 0;
-            font-size: 14px;
-        }
-
-        /* ===================================
-           TABLET - Media Query (min-width: 600px)
-           =================================== */
-
-        @media (min-width: 600px) {
-            body {
-                padding: 20px;
-            }
-
-            .container {
-                border-radius: 16px;
-            }
-
-            .header {
-                padding: 25px 20px;
-            }
-
-            .header h1 {
-                font-size: 24px;
-            }
-
-            .header p {
-                font-size: 15px;
-            }
-
-            .content {
-                padding: 30px 25px;
-            }
-
-            .alert-box {
-                padding: 22px;
-            }
-
-            .alert-box h3 {
-                font-size: 19px;
-            }
-
-            .alert-box .icon {
-                font-size: 44px;
-            }
-
-            .video-container h2 {
-                font-size: 20px;
-            }
-
-            #videoPreview {
-                max-width: 400px;
-            }
-
-            .form-group h2 {
-                font-size: 22px;
-            }
-
-            .countdown {
-                font-size: 64px;
-            }
-
-            .button-group {
-                flex-direction: row;
-                gap: 15px;
-            }
-
-            .btn {
-                flex: 1;
-            }
-        }
-
-        /* ===================================
-           DESKTOP - Media Query (min-width: 900px)
-           =================================== */
-
-        @media (min-width: 900px) {
-            body {
-                padding: 30px;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-            }
-
-            .container {
-                max-width: 800px;
-                border-radius: 20px;
-                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            }
-
-            .header {
-                padding: 35px 30px;
-            }
-
-            .header h1 {
-                font-size: 28px;
-                margin-bottom: 10px;
-            }
-
-            .header p {
-                font-size: 16px;
-            }
-
-            .progress-bar {
-                height: 8px;
-            }
-
-            .content {
-                padding: 40px 35px;
-            }
-
-            .step-indicator {
-                font-size: 14px;
-                margin-bottom: 20px;
-            }
-
-            .alert-box {
-                padding: 25px;
-            }
-
-            .alert-box h3 {
-                font-size: 20px;
-                margin-bottom: 15px;
-            }
-
-            .alert-box p,
-            .alert-box ul {
-                font-size: 15px;
-            }
-
-            .alert-box .icon {
-                font-size: 48px;
-                margin-bottom: 15px;
-            }
-
-            .video-container h2 {
-                font-size: 22px;
-                margin-bottom: 20px;
-            }
-
-            #videoPreview {
-                margin: 20px auto;
-            }
-
-            .video-status {
-                padding: 15px;
-                font-size: 15px;
-            }
-
-            .countdown {
-                font-size: 72px;
-                margin: 20px 0;
-            }
-
-            .form-group {
-                margin-bottom: 25px;
-            }
-
-            .form-group h2 {
-                font-size: 24px;
-                margin-bottom: 25px;
-            }
-
-            .form-group label {
-                font-size: 16px;
-                margin-bottom: 8px;
-            }
-
-            .form-group input[type="text"],
-            .form-group input[type="email"],
-            .form-group input[type="tel"],
-            .form-group select,
-            .form-group textarea {
-                padding: 12px 15px;
-                font-size: 15px;
-            }
-
-            .radio-option,
-            .checkbox-option {
-                padding: 14px;
-            }
-
-            .radio-option:hover,
-            .checkbox-option:hover {
-                border-color: #667eea;
-                background: #f5f7ff;
-            }
-
-            .radio-option input,
-            .checkbox-option input {
-                width: 18px;
-                height: 18px;
-                min-width: 18px;
-            }
-
-            .button-group {
-                margin-top: 30px;
-            }
-
-            .btn {
-                padding: 14px 30px;
-            }
-
-            .btn-primary:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-            }
-
-            .btn-secondary:hover {
-                background: #5a6268;
-            }
-
-            .success-message {
-                padding: 40px;
-            }
-
-            .success-message .icon {
-                font-size: 80px;
-                margin-bottom: 20px;
-            }
-
-            .success-message h2 {
-                font-size: 26px;
-                margin-bottom: 15px;
-            }
-
-            .success-message p {
-                font-size: 16px;
-            }
-        }
-
-        /* ===================================
-           LARGE DESKTOP (min-width: 1200px)
-           =================================== */
-
-        @media (min-width: 1200px) {
-            .container {
-                max-width: 900px;
-            }
-
-            .content {
-                padding: 45px 40px;
-            }
-        }
-    </style>
+    <!-- CSS externo -->
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/notifications.css">
 </head>
 <body>
     <div class="container">
+        <!-- Header -->
         <div class="header">
-            <h1>🎓 Formulario Evento de Egresados de Posgrado</h1>
-            <p>Tu opinión es importante para nosotros</p>
+            <div class="logos-container">
+                <img src="ipn-logo.png" alt="IPN Logo" class="logo-ipn">
+                <img src="upiita-logo.png" alt="UPIITA Logo" class="logo-upiita">
+            </div>
+            <h1>🎓</h1>
+            <p>Tu opinin es importante para nosotros</p>
         </div>
 
+        <!-- Barra de progreso -->
         <div class="progress-bar">
             <div class="progress-fill" id="progressBar"></div>
         </div>
@@ -631,15 +33,15 @@
                 <div class="alert-box">
                     <div class="icon">📹 📍</div>
                     <h3>Aviso Importante: Permisos Requeridos</h3>
-                    <p style="margin-bottom: 15px; color: #856404;">
-                        Para continuar con este formulario, necesitamos tu autorización para:
+                    <p>
+                        Para continuar con este formulario, necesitamos tu autorizacin para:
                     </p>
                     <ul>
-                        <li><strong>Cámara:</strong> Se grabará un video de 5 segundos para verificación de identidad</li>
-                        <li><strong>Ubicación GPS:</strong> Se registrará tu ubicación actual para validar tu asistencia</li>
+                        <li><strong>Cmara:</strong> Se grabar un video de 5 segundos para verificacin de identidad</li>
+                        <li><strong>Ubicacin GPS:</strong> Se registrar tu ubicacin actual para validar tu asistencia</li>
                     </ul>
-                    <p style="margin-top: 15px; color: #856404; font-weight: bold;">
-                        Estos datos serán utilizados únicamente para fines del evento de egresados y serán tratados de manera confidencial.
+                    <p style="margin-top: 15px; font-weight: bold;">
+                        Estos datos sern utilizados nicamente para fines del evento de egresados y sern tratados de manera confidencial.
                     </p>
                 </div>
                 <div class="error-message" id="permissionError"></div>
@@ -653,18 +55,16 @@
             <!-- PASO 2: Captura de Video -->
             <div class="step" id="step2">
                 <div class="step-indicator">Paso 2 de 5</div>
-                <h2 style="text-align: center; color: #333; margin-bottom: 20px;">
-                    Grabación de Video de Verificación
-                </h2>
                 <div class="video-container">
+                    <h2>Grabacin de Video de Verificacin</h2>
                     <video id="videoPreview" autoplay playsinline></video>
                     <div class="countdown" id="countdown"></div>
                     <div class="video-status" id="videoStatus">
-                        Preparando cámara...
+                        Preparando cmara...
                     </div>
                 </div>
                 <div class="location-info" id="locationInfo">
-                    <p><strong>📍 Ubicación registrada:</strong></p>
+                    <p><strong>🔔Ubicacin registrada:</strong></p>
                     <p id="locationText"></p>
                 </div>
             </div>
@@ -672,7 +72,9 @@
             <!-- PASO 3: Datos Personales -->
             <div class="step" id="step3">
                 <div class="step-indicator">Paso 3 de 5</div>
-                <h2 style="color: #333; margin-bottom: 25px;">Datos Personales</h2>
+                <div class="form-group">
+                    <h2>Datos Personales</h2>
+                </div>
 
                 <div class="form-group">
                     <label for="nombre">1. Nombre completo: *</label>
@@ -680,22 +82,22 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="email">2. Correo electrónico: *</label>
+                    <label for="email">2. Correo electrnico: *</label>
                     <input type="email" id="email" required placeholder="ejemplo@correo.com">
                 </div>
 
                 <div class="form-group">
-                    <label for="telefono">3. Teléfono: *</label>
-                    <input type="tel" id="telefono" required placeholder="10 dígitos">
+                    <label for="telefono">3. Telfono: *</label>
+                    <input type="tel" id="telefono" required placeholder="10 dgitos">
                 </div>
 
                 <div class="form-group">
                     <label for="programa">4. Programa de posgrado del que egresaste: *</label>
                     <select id="programa" required>
-                        <option value="">Selecciona una opción</option>
-                        <option value="maestria_administracion">Maestría en Administración</option>
-                        <option value="maestria_educacion">Maestría en Educación</option>
-                        <option value="maestria_ingenieria">Maestría en Ingeniería</option>
+                        <option value="">Selecciona una opcin</option>
+                        <option value="maestria_administracion">Maestra en Administracin</option>
+                        <option value="maestria_educacion">Maestra en Educacin</option>
+                        <option value="maestria_ingenieria">Maestra en Ingeniera</option>
                         <option value="doctorado_ciencias">Doctorado en Ciencias</option>
                         <option value="doctorado_humanidades">Doctorado en Humanidades</option>
                         <option value="otro">Otro</option>
@@ -708,13 +110,15 @@
                 </div>
             </div>
 
-            <!-- PASO 4: Preferencias del Evento (Preguntas 5-7) -->
+            <!-- PASO 4: Preferencias del Evento -->
             <div class="step" id="step4">
                 <div class="step-indicator">Paso 4 de 5</div>
-                <h2 style="color: #333; margin-bottom: 25px;">Preferencias del Evento</h2>
+                <div class="form-group">
+                    <h2>Preferencias del Evento</h2>
+                </div>
 
                 <div class="form-group">
-                    <label>5. ¿Qué tipo de evento te gustaría que fuera? *</label>
+                    <label>5. Qu tipo de evento te gustara que fuera? *</label>
                     <div class="radio-group">
                         <label class="radio-option">
                             <input type="radio" name="tipoEvento" value="formal" required>
@@ -726,21 +130,21 @@
                         </label>
                         <label class="radio-option">
                             <input type="radio" name="tipoEvento" value="casual" required>
-                            Casual (reunión informal, vestimenta libre)
+                            Casual (reunin informal, vestimenta libre)
                         </label>
                         <label class="radio-option">
                             <input type="radio" name="tipoEvento" value="tematico" required>
-                            Temático (fiesta con tema específico)
+                            Temtico (fiesta con tema especfico)
                         </label>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label>6. ¿Qué horario prefieres para el evento? *</label>
+                    <label>6. Qu horario prefieres para el evento? *</label>
                     <div class="radio-group">
                         <label class="radio-option">
                             <input type="radio" name="horario" value="manana" required>
-                            Mañana (9:00 AM - 12:00 PM)
+                            Maana (9:00 AM - 12:00 PM)
                         </label>
                         <label class="radio-option">
                             <input type="radio" name="horario" value="tarde" required>
@@ -754,7 +158,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label>7. ¿Qué actividades te gustaría que se incluyeran? (Selecciona todas las que apliquen) *</label>
+                    <label>7. Qu actividades te gustara que se incluyeran? (Selecciona todas las que apliquen) *</label>
                     <div class="checkbox-group">
                         <label class="checkbox-option">
                             <input type="checkbox" name="actividades" value="discursos">
@@ -762,7 +166,7 @@
                         </label>
                         <label class="checkbox-option">
                             <input type="checkbox" name="actividades" value="musica">
-                            Música en vivo / DJ
+                            Msica en vivo / DJ
                         </label>
                         <label class="checkbox-option">
                             <input type="checkbox" name="actividades" value="cena">
@@ -778,7 +182,7 @@
                         </label>
                         <label class="checkbox-option">
                             <input type="checkbox" name="actividades" value="fotografia">
-                            Sesión de fotografía profesional
+                            Sesin de fotografa profesional
                         </label>
                     </div>
                 </div>
@@ -789,18 +193,20 @@
                 </div>
             </div>
 
-            <!-- PASO 5: Preferencias Adicionales y Envío (Preguntas 8-10) -->
+            <!-- PASO 5: Detalles Finales -->
             <div class="step" id="step5">
                 <div class="step-indicator">Paso 5 de 5</div>
-                <h2 style="color: #333; margin-bottom: 25px;">Detalles Finales</h2>
+                <div class="form-group">
+                    <h2>Detalles Finales</h2>
+                </div>
 
                 <div class="form-group">
-                    <label for="lugar">8. ¿Qué tipo de lugar prefieres? *</label>
+                    <label for="lugar">8. Qu tipo de lugar prefieres? *</label>
                     <select id="lugar" required>
-                        <option value="">Selecciona una opción</option>
-                        <option value="salon_eventos">Salón de eventos</option>
+                        <option value="">Selecciona una opcin</option>
+                        <option value="salon_eventos">Saln de eventos</option>
                         <option value="hotel">Hotel</option>
-                        <option value="jardin">Jardín / Terraza</option>
+                        <option value="jardin">Jardn / Terraza</option>
                         <option value="restaurante">Restaurante</option>
                         <option value="campus">Campus universitario</option>
                         <option value="otro">Otro</option>
@@ -808,15 +214,15 @@
                 </div>
 
                 <div class="form-group">
-                    <label>9. ¿Asistirías con acompañante? *</label>
+                    <label>9. Asistiras con acompaante? *</label>
                     <div class="radio-group">
                         <label class="radio-option">
                             <input type="radio" name="acompanante" value="si" required>
-                            Sí, asistiría con acompañante
+                            S, asistira con acompaante
                         </label>
                         <label class="radio-option">
                             <input type="radio" name="acompanante" value="no" required>
-                            No, asistiría solo/a
+                            No, asistira solo/a
                         </label>
                     </div>
                 </div>
@@ -834,11 +240,11 @@
                 </div>
             </div>
 
-            <!-- Mensaje de Éxito -->
+            <!-- Mensaje de xito -->
             <div class="step" id="stepSuccess">
                 <div class="success-message">
-                    <div class="icon">✅</div>
-                    <h2>¡Formulario Enviado Exitosamente!</h2>
+                    <div class="icon"></div>
+                    <h2>Formulario Enviado Exitosamente!</h2>
                     <p>Gracias por completar el formulario.</p>
                     <p>Tus respuestas han sido registradas correctamente.</p>
                     <p style="margin-top: 20px; color: #667eea; font-weight: bold;">
@@ -849,283 +255,16 @@
         </div>
     </div>
 
-    <script>
-        // Variables globales
-        let currentStep = 1;
-        let videoBlob = null;
-        let locationData = null;
-        let mediaRecorder = null;
-        let stream = null;
-        const totalSteps = 5;
+    <!-- Botn flotante estilo Messenger para panel admin -->
+    <div class="messenger-bubble" id="serverBubble" ondblclick="openAdminPanel()" title="Doble click para abrir panel">
+        <div class="bubble-content">
+            <div class="bubble-icon">🔔</div>
+            <div class="bubble-text">SERVIDOR</div>
+        </div>
+    </div>
 
-        // Actualizar barra de progreso
-        function updateProgress() {
-            const progress = (currentStep / totalSteps) * 100;
-            document.getElementById('progressBar').style.width = progress + '%';
-        }
-
-        // Navegación entre pasos
-        function showStep(step) {
-            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
-            document.getElementById('step' + step).classList.add('active');
-            currentStep = step;
-            updateProgress();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        function nextStep() {
-            if (validateCurrentStep()) {
-                if (currentStep < totalSteps) {
-                    showStep(currentStep + 1);
-                }
-            }
-        }
-
-        function previousStep() {
-            if (currentStep > 1) {
-                showStep(currentStep - 1);
-            }
-        }
-
-        // Validación de pasos
-        function validateCurrentStep() {
-            if (currentStep === 3) {
-                const nombre = document.getElementById('nombre').value.trim();
-                const email = document.getElementById('email').value.trim();
-                const telefono = document.getElementById('telefono').value.trim();
-                const programa = document.getElementById('programa').value;
-
-                if (!nombre || !email || !telefono || !programa) {
-                    alert('Por favor, completa todos los campos obligatorios.');
-                    return false;
-                }
-
-                // Validar email
-                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (!emailRegex.test(email)) {
-                    alert('Por favor, ingresa un correo electrónico válido.');
-                    return false;
-                }
-
-                // Validar teléfono (10 dígitos)
-                const telefonoRegex = /^\d{10}$/;
-                if (!telefonoRegex.test(telefono.replace(/\s/g, ''))) {
-                    alert('Por favor, ingresa un teléfono válido de 10 dígitos.');
-                    return false;
-                }
-            }
-
-            if (currentStep === 4) {
-                const tipoEvento = document.querySelector('input[name="tipoEvento"]:checked');
-                const horario = document.querySelector('input[name="horario"]:checked');
-                const actividades = document.querySelectorAll('input[name="actividades"]:checked');
-
-                if (!tipoEvento || !horario) {
-                    alert('Por favor, selecciona una opción en todas las preguntas.');
-                    return false;
-                }
-
-                if (actividades.length === 0) {
-                    alert('Por favor, selecciona al menos una actividad.');
-                    return false;
-                }
-            }
-
-            if (currentStep === 5) {
-                const lugar = document.getElementById('lugar').value;
-                const acompanante = document.querySelector('input[name="acompanante"]:checked');
-
-                if (!lugar || !acompanante) {
-                    alert('Por favor, completa todas las preguntas obligatorias.');
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        // PASO 1: Solicitar permisos
-        async function acceptPermissions() {
-            const errorDiv = document.getElementById('permissionError');
-            errorDiv.style.display = 'none';
-
-            try {
-                // Solicitar permisos de cámara
-                stream = await navigator.mediaDevices.getUserMedia({
-                    video: true,
-                    audio: true
-                });
-
-                // Solicitar permisos de ubicación
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        locationData = {
-                            latitude: position.coords.latitude,
-                            longitude: position.coords.longitude,
-                            timestamp: new Date().toISOString()
-                        };
-
-                        // Continuar al paso 2 para grabar video
-                        showStep(2);
-                        startVideoRecording();
-                    },
-                    (error) => {
-                        errorDiv.textContent = 'Error al obtener la ubicación: ' + error.message + '. Por favor, acepta los permisos de ubicación.';
-                        errorDiv.style.display = 'block';
-                        if (stream) {
-                            stream.getTracks().forEach(track => track.stop());
-                        }
-                    }
-                );
-
-            } catch (error) {
-                errorDiv.textContent = 'Error al acceder a la cámara: ' + error.message + '. Por favor, acepta los permisos de cámara.';
-                errorDiv.style.display = 'block';
-            }
-        }
-
-        // PASO 2: Grabar video de 5 segundos
-        function startVideoRecording() {
-            const video = document.getElementById('videoPreview');
-            const statusDiv = document.getElementById('videoStatus');
-            const countdownDiv = document.getElementById('countdown');
-            const locationInfo = document.getElementById('locationInfo');
-            const locationText = document.getElementById('locationText');
-
-            video.style.display = 'block';
-            video.srcObject = stream;
-
-            // Mostrar ubicación
-            if (locationData) {
-                locationText.textContent = `Lat: ${locationData.latitude.toFixed(6)}, Long: ${locationData.longitude.toFixed(6)}`;
-                locationInfo.style.display = 'block';
-            }
-
-            // Countdown de 3 segundos antes de iniciar
-            let countdown = 3;
-            statusDiv.textContent = 'Prepárate para la grabación...';
-            countdownDiv.textContent = countdown;
-
-            const countdownInterval = setInterval(() => {
-                countdown--;
-                if (countdown > 0) {
-                    countdownDiv.textContent = countdown;
-                } else {
-                    clearInterval(countdownInterval);
-                    countdownDiv.textContent = '';
-                    startRecording();
-                }
-            }, 1000);
-        }
-
-        function startRecording() {
-            const statusDiv = document.getElementById('videoStatus');
-            const countdownDiv = document.getElementById('countdown');
-
-            statusDiv.textContent = '🔴 Grabando...';
-
-            const chunks = [];
-            mediaRecorder = new MediaRecorder(stream);
-
-            mediaRecorder.ondataavailable = (event) => {
-                if (event.data.size > 0) {
-                    chunks.push(event.data);
-                }
-            };
-
-            mediaRecorder.onstop = () => {
-                videoBlob = new Blob(chunks, { type: 'video/webm' });
-                statusDiv.textContent = '✅ Video grabado exitosamente';
-
-                // Detener stream
-                stream.getTracks().forEach(track => track.stop());
-
-                // Esperar 2 segundos y continuar al siguiente paso
-                setTimeout(() => {
-                    showStep(3);
-                }, 2000);
-            };
-
-            mediaRecorder.start();
-
-            // Grabar por 5 segundos con countdown
-            let recordTime = 5;
-            countdownDiv.textContent = recordTime + 's';
-
-            const recordInterval = setInterval(() => {
-                recordTime--;
-                countdownDiv.textContent = recordTime + 's';
-
-                if (recordTime <= 0) {
-                    clearInterval(recordInterval);
-                    mediaRecorder.stop();
-                }
-            }, 1000);
-        }
-
-        // PASO 5: Enviar formulario
-        function submitForm() {
-            if (!validateCurrentStep()) {
-                return;
-            }
-
-            // Recopilar todos los datos
-            const formData = {
-                // Datos de verificación
-                video: videoBlob,
-                ubicacion: locationData,
-
-                // Datos personales
-                nombre: document.getElementById('nombre').value,
-                email: document.getElementById('email').value,
-                telefono: document.getElementById('telefono').value,
-                programa: document.getElementById('programa').value,
-
-                // Preferencias del evento
-                tipoEvento: document.querySelector('input[name="tipoEvento"]:checked').value,
-                horario: document.querySelector('input[name="horario"]:checked').value,
-                actividades: Array.from(document.querySelectorAll('input[name="actividades"]:checked'))
-                    .map(cb => cb.value),
-
-                // Detalles finales
-                lugar: document.getElementById('lugar').value,
-                acompanante: document.querySelector('input[name="acompanante"]:checked').value,
-                sugerencias: document.getElementById('sugerencias').value,
-
-                // Metadata
-                fechaEnvio: new Date().toISOString()
-            };
-
-            // Aquí normalmente enviarías los datos al servidor
-            console.log('Datos del formulario:', formData);
-
-            // Simular envío (en producción, aquí harías un fetch/ajax al servidor)
-            // Por ejemplo:
-            /*
-            const data = new FormData();
-            data.append('video', videoBlob, 'verification.webm');
-            data.append('datos', JSON.stringify(formData));
-
-            fetch('/api/formulario-egresados', {
-                method: 'POST',
-                body: data
-            })
-            .then(response => response.json())
-            .then(result => {
-                showStep('Success');
-            })
-            .catch(error => {
-                document.getElementById('submitError').textContent = 'Error al enviar el formulario. Por favor, intenta nuevamente.';
-                document.getElementById('submitError').style.display = 'block';
-            });
-            */
-
-            // Por ahora, solo mostramos el mensaje de éxito
-            showStep('Success');
-        }
-
-        // Inicializar
-        updateProgress();
-    </script>
+    <!-- JavaScript externo -->
+    <script src="js/notifications.js"></script>
+    <script src="js/app.js"></script>
 </body>
 </html>
