@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(powershell.exe -ExecutionPolicy Bypass -File fix_encoding.ps1)",
+      "Bash(python fix_encoding.py:*)",
+      "Bash(python:*)",
+      "Bash(node fix.js:*)",
+      "Bash(node fix_final.js:*)",
+      "Bash(git restore:*)",
+      "Bash(node fix_encoding_final.js:*)",
+      "Bash(done)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

@@ -1,0 +1,644 @@
+<!DOCTYPE html✅
+<html lang="es"✅
+<head✅
+    <meta charset="UTF-8"✅
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"✅
+    <title✅Panel de Administraci�n - Egresados</title✅
+
+    <!-- Leaflet CSS para mapas --✅
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" /✅
+
+    <style✅
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: #f5f7fa;
+            color: #333;
+        }
+
+        /* ===== HEADER ===== */
+        .admin-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .header-logos {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .header-logo {
+            height: 45px;
+            filter: brightness(0) invert(1);
+        }
+
+        .header-title {
+            flex: 1;
+            text-align: center;
+        }
+
+        .header-title h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .header-title p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .btn-logout {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid white;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-logout:hover {
+            background: white;
+            color: #667eea;
+        }
+
+        /* ===== NAVEGACI�N ===== */
+        .admin-nav {
+            background: white;
+            padding: 15px 30px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+        }
+
+        .nav-btn {
+            padding: 10px 20px;
+            border: none;
+            background: #f0f2f5;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .nav-btn:hover {
+            background: #e4e6eb;
+        }
+
+        .nav-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        /* ===== CONTENIDO ===== */
+        .admin-content {
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 0 30px;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ===== DASHBOARD ===== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border-left: 4px solid;
+        }
+
+        .stat-card.blue { border-left-color: #667eea; }
+        .stat-card.green { border-left-color: #28a745; }
+        .stat-card.orange { border-left-color: #ffc107; }
+        .stat-card.purple { border-left-color: #764ba2; }
+
+        .stat-number {
+            font-size: 36px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .chart-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+
+        .chart-card h3 {
+            margin-bottom: 20px;
+            color: #667eea;
+        }
+
+        /* ===== TABLA ===== */
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+
+        .table-header {
+            padding: 20px 25px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .table-header h2 {
+            color: #333;
+        }
+
+        .search-box {
+            padding: 10px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            width: 300px;
+            max-width: 100%;
+            font-size: 14px;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #f8f9fa;
+        }
+
+        th {
+            text-align: left;
+            padding: 15px 20px;
+            font-weight: 600;
+            color: #666;
+            font-size: 13px;
+            text-transform: uppercase;
+        }
+
+        td {
+            padding: 15px 20px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        tbody tr {
+            transition: background 0.2s;
+            cursor: pointer;
+        }
+
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-success { background: #d4edda; color: #28a745; }
+        .badge-warning { background: #fff3cd; color: #856404; }
+        .badge-info { background: #d1ecf1; color: #0c5460; }
+
+        .btn-view {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-view:hover {
+            background: #5568d3;
+            transform: translateY(-1px);
+        }
+
+        /* ===== MODAL ===== */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 16px;
+            max-width: 900px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            padding: 25px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 22px;
+            color: #333;
+        }
+
+        .btn-close {
+            background: none;
+            border: none;
+            font-size: 28px;
+            color: #999;
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .btn-close:hover {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .modal-body {
+            padding: 25px;
+        }
+
+        .detail-section {
+            margin-bottom: 25px;
+        }
+
+        .detail-section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 18px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 8px;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .detail-item {
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .detail-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .detail-value {
+            font-size: 15px;
+            color: #333;
+        }
+
+        #detailVideo {
+            width: 100%;
+            border-radius: 12px;
+            background: #000;
+            margin-bottom: 15px;
+        }
+
+        #detailMap {
+            width: 100%;
+            height: 350px;
+            border-radius: 12px;
+            margin-top: 15px;
+        }
+
+        .activities-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .activity-tag {
+            background: #667eea;
+            color: white;
+            padding: 6px 14px;
+            border-radius: 16px;
+            font-size: 13px;
+        }
+
+        /* ===== PAGINACI�N ===== */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            padding: 20px;
+        }
+
+        .page-btn {
+            padding: 8px 14px;
+            border: 1px solid #e0e0e0;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .page-btn:hover:not(:disabled) {
+            background: #f0f0f0;
+        }
+
+        .page-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .admin-header {
+                padding: 15px 20px;
+            }
+
+            .header-title h1 {
+                font-size: 18px;
+            }
+
+            .header-logo {
+                height: 35px;
+            }
+
+            .admin-nav {
+                padding: 10px 20px;
+            }
+
+            .admin-content {
+                margin: 20px auto;
+                padding: 0 20px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .search-box {
+                width: 100%;
+            }
+
+            .modal {
+                margin: 10px;
+            }
+
+            .detail-grid {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                font-size: 13px;
+            }
+
+            th, td {
+                padding: 10px 12px;
+            }
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style✅
+</head✅
+<body✅
+    <!-- Header --✅
+    <div class="admin-header"✅
+        <div class="header-logos"✅
+            <img src="ipn-logo.png" alt="IPN" class="header-logo"✅
+            <img src="upiita-logo.png" alt="UPIITA" class="header-logo"✅
+        </div✅
+        <div class="header-title"✅
+            <h1✅🔔Panel de Administraci�n</h1✅
+            <p✅Gesti�n de Formularios de Egresados</p✅
+        </div✅
+        <button class="btn-logout" onclick="logout()"✅Cerrar Sesi�n</button✅
+    </div✅
+
+    <!-- Navigation --✅
+    <div class="admin-nav"✅
+        <button class="nav-btn active" onclick="showPage('dashboard')"✅🔔Dashboard</button✅
+        <button class="nav-btn" onclick="showPage('respuestas')"✅🔔Respuestas</button✅
+        <button class="nav-btn" onclick="showPage('mapa')"✅🔔 Mapa General</button✅
+        <button class="nav-btn" onclick="showPage('estadisticas')"✅🔔Estad�sticas</button✅
+    </div✅
+
+    <!-- Content --✅
+    <div class="admin-content"✅
+        <!-- DASHBOARD PAGE --✅
+        <div id="dashboard" class="page active"✅
+            <div class="stats-grid"✅
+                <div class="stat-card blue"✅
+                    <div class="stat-number" id="totalRespuestas"✅-</div✅
+                    <div class="stat-label"✅Total de Respuestas</div✅
+                </div✅
+                <div class="stat-card green"✅
+                    <div class="stat-number" id="respuestasHoy"✅-</div✅
+                    <div class="stat-label"✅Respuestas Hoy</div✅
+                </div✅
+                <div class="stat-card orange"✅
+                    <div class="stat-number" id="tiempoPromedio"✅-</div✅
+                    <div class="stat-label"✅Tiempo Promedio (min)</div✅
+                </div✅
+                <div class="stat-card purple"✅
+                    <div class="stat-number" id="programaTop"✅-</div✅
+                    <div class="stat-label"✅Programa M�s Popular</div✅
+                </div✅
+            </div✅
+
+            <div class="chart-card"✅
+                <h3✅🔔�ltimas Respuestas</h3✅
+                <div id="ultimasRespuestas" class="loading"✅
+                    <div class="spinner"✅</div✅
+                    Cargando...
+                </div✅
+            </div✅
+
+            <div class="chart-card"✅
+                <h3✅🎓
+                <div id="topActividades"✅</div✅
+            </div✅
+        </div✅
+
+        <!-- RESPUESTAS PAGE --✅
+        <div id="respuestas" class="page"✅
+            <div class="table-container"✅
+                <div class="table-header"✅
+                    <h2✅🔔Lista de Respuestas</h2✅
+                    <input type="text" class="search-box" placeholder="Buscar por nombre o email..." id="searchInput" oninput="filterTable()"✅
+                </div✅
+                <div style="overflow-x: auto;"✅
+                    <table id="respuestasTable"✅
+                        <thead✅
+                            <tr✅
+                                <th✅ID</th✅
+                                <th✅Nombre</th✅
+                                <th✅Email</th✅
+                                <th✅Programa</th✅
+                                <th✅Fecha</th✅
+                                <th✅Acciones</th✅
+                            </tr✅
+                        </thead✅
+                        <tbody id="respuestasBody"✅
+                            <tr✅
+                                <td colspan="6" class="loading"✅
+                                    <div class="spinner"✅</div✅
+                                    Cargando respuestas...
+                                </td✅
+                            </tr✅
+                        </tbody✅
+                    </table✅
+                </div✅
+                <div class="pagination" id="pagination"✅</div✅
+            </div✅
+        </div✅
+
+        <!-- MAPA PAGE --✅
+        <div id="mapa" class="page"✅
+            <div class="chart-card"✅
+                <h3✅🔔 Ubicaciones de los Participantes</h3✅
+                <div id="generalMap" style="width: 100%; height: 600px; border-radius: 12px;"✅</div✅
+            </div✅
+        </div✅
+
+        <!-- ESTAD�STICAS PAGE --✅
+        <div id="estadisticas" class="page"✅
+            <div class="chart-card"✅
+                <h3✅🔔Estad�sticas Detalladas</h3✅
+                <div id="statsContent" class="loading"✅
+                    <div class="spinner"✅</div✅
+                    Cargando estad�sticas...
+                </div✅
+            </div✅
+        </div✅
+    </div✅
+
+    <!-- Modal de Detalle --✅
+    <div class="modal-overlay" id="modalDetalle"✅
+        <div class="modal"✅
+            <div class="modal-header"✅
+                <h2 class="modal-title"✅Detalle de Respuesta</h2✅
+                <button class="btn-close" onclick="closeModal()"✅&times;</button✅
+            </div✅
+            <div class="modal-body" id="modalBody"✅
+                <!-- Se llena din�micamente --✅
+            </div✅
+        </div✅
+    </div✅
+
+    <!-- Leaflet JS --✅
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"✅</script✅
+
+    <!-- Auth JS --✅
+    <script src="js/auth.js"✅</script✅
+
+    <!-- Admin JS --✅
+    <script src="js/admin.js"✅</script✅
+</body✅
+</html✅
