@@ -84,18 +84,20 @@ def get_client_ip():
 def log_event(session_id, event_type, event_data=None):
     """Registrar evento en la base de datos"""
     conn = get_db()
-    conn.execute('''
-        INSERT INTO event_logs (session_id, event_type, event_data, ip_address, user_agent)
-        VALUES (?, ?, ?, ?, ?)
-    ''', (
-        session_id,
-        event_type,
-        json.dumps(event_data) if event_data else None,
-        get_client_ip(),
-        request.headers.get('User-Agent', 'unknown')
-    ))
-    conn.commit()
-    conn.close()
+    try:
+        conn.execute('''
+            INSERT INTO event_logs (session_id, event_type, event_data, ip_address, user_agent)
+            VALUES (?, ?, ?, ?, ?)
+        ''', (
+            session_id,
+            event_type,
+            json.dumps(event_data) if event_data else None,
+            get_client_ip(),
+            request.headers.get('User-Agent', 'unknown')
+        ))
+        conn.commit()
+    finally:
+        conn.close()
 
 # ===================================
 # ENDPOINTS DE LA API
@@ -108,7 +110,7 @@ def submit_form():
         # Obtener datos JSON
         datos_json = request.form.get('datos')
         if not datos_json:
-            return jsonify({'error': 'No se recibieron datos'}), 400
+            return jsonify({'error': 'Datos no recibidos', 'details': 'No se recibieron datos en el formulario.'}), 400
 
         datos = json.loads(datos_json)
         session_id = datos.get('sessionId')
@@ -118,14 +120,14 @@ def submit_form():
 
         # Obtener archivo de video
         if 'video' not in request.files:
-            return jsonify({'error': 'No se recibió el video'}), 400
+            return jsonify({'error': 'Video no recibido', 'details': 'No se recibió el archivo de video.'}), 400
 
         video_file = request.files['video']
         if video_file.filename == '':
-            return jsonify({'error': 'Nombre de archivo vacío'}), 400
+            return jsonify({'error': 'Nombre de archivo inválido', 'details': 'El nombre del archivo de video está vacío.'}), 400
 
         if not allowed_file(video_file.filename):
-            return jsonify({'error': 'Tipo de archivo no permitido'}), 400
+            return jsonify({'error': 'Tipo de archivo no permitido', 'details': f'El tipo de archivo no está en la lista de extensiones permitidas: {ALLOWED_VIDEO_EXTENSIONS}'}), 400
 
         # Leer datos del video
         video_data = video_file.read()
@@ -355,10 +357,8 @@ def get_stats():
 
         conn.close()
 
-        return jsonify(stats), 200
-
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'Error al obtener estadísticas', 'details': str(e)}), 500
 
 @app.route('/api/health', methods=['GET'])
 def health_check():
@@ -415,7 +415,7 @@ def get_all_respuestas():
 
     except Exception as e:
         print(f"Error en get_all_respuestas: {str(e)}")
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'Error al obtener respuestas', 'details': str(e)}), 500
 
 @app.route('/api/admin/respuesta/<int:respuesta_id>', methods=['GET', 'DELETE'])
 def handle_respuesta(respuesta_id):
@@ -475,7 +475,7 @@ def get_respuesta_detail(respuesta_id):
         }), 200
 
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'Error al obtener el detalle de la respuesta', 'details': str(e)}), 500
 
 def delete_respuesta(respuesta_id):
     """Eliminar una respuesta y sus datos asociados"""
@@ -508,7 +508,7 @@ def delete_respuesta(respuesta_id):
         return jsonify({'success': True, 'message': f'Respuesta {respuesta_id} eliminada exitosamente'}), 200
 
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'Error al eliminar la respuesta', 'details': str(e)}), 500
 
 @app.route('/api/admin/video/<int:respuesta_id>', methods=['GET'])
 def get_video(respuesta_id):
@@ -528,85 +528,7 @@ def get_video(respuesta_id):
         return send_file(result['filepath'], mimetype='video/webm')
 
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/api/admin/dashboard', methods=['GET'])
-def get_dashboard_stats():
-    """Obtener estadísticas para el dashboard"""
-    try:
-        conn = get_db()
-        cursor = conn.cursor()
-
-        stats = {}
-
-        # Total de respuestas
-        cursor.execute('SELECT COUNT(*) as total FROM respuestas')
-        stats['total_respuestas'] = cursor.fetchone()['total']
-
-        # Respuestas hoy
-        cursor.execute("SELECT COUNT(*) as total FROM respuestas WHERE DATE(created_at) = DATE('now')")
-        stats['respuestas_hoy'] = cursor.fetchone()['total']
-
-        # Por programa
-        cursor.execute('''
-            SELECT programa, COUNT(*) as count
-            FROM respuestas
-            GROUP BY programa
-            ORDER BY count DESC
-        ''')
-        stats['por_programa'] = [dict(row) for row in cursor.fetchall()]
-
-        # Tipo de evento más popular
-        cursor.execute('''
-            SELECT tipo_evento, COUNT(*) as count
-            FROM respuestas
-            GROUP BY tipo_evento
-            ORDER BY count DESC
-            LIMIT 1
-        ''')
-        result = cursor.fetchone()
-        stats['evento_popular'] = dict(result) if result else {}
-
-        # Horario preferido
-        cursor.execute('''
-            SELECT horario, COUNT(*) as count
-            FROM respuestas
-            GROUP BY horario
-            ORDER BY count DESC
-        ''')
-        stats['horarios'] = [dict(row) for row in cursor.fetchall()]
-
-        # Actividades más solicitadas
-        cursor.execute('''
-            SELECT actividad, COUNT(*) as count
-            FROM actividades_seleccionadas
-            GROUP BY actividad
-            ORDER BY count DESC
-            LIMIT 5
-        ''')
-        stats['actividades_top'] = [dict(row) for row in cursor.fetchall()]
-
-        # Tiempo promedio de llenado
-        cursor.execute('SELECT AVG(duracion_total_segundos) as promedio FROM respuestas')
-        avg_result = cursor.fetchone()
-        stats['tiempo_promedio'] = avg_result['promedio'] if avg_result and avg_result['promedio'] else 0
-
-        # Últimas respuestas
-        cursor.execute('''
-            SELECT id, nombre, programa, created_at
-            FROM respuestas
-            ORDER BY created_at DESC
-            LIMIT 5
-        ''')
-        stats['ultimas_respuestas'] = [dict(row) for row in cursor.fetchall()]
-
-        conn.close()
-
-        return jsonify(stats), 200
-
-    except Exception as e:
-        print(f"Error en get_dashboard_stats: {str(e)}")
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'Error al obtener el video', 'details': str(e)}), 500
 
 @app.route('/api/admin/statistics', methods=['GET'])
 def get_detailed_statistics():
@@ -647,7 +569,7 @@ def get_detailed_statistics():
 
     except Exception as e:
         print(f"Error en get_detailed_statistics: {str(e)}")
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'Error al obtener las estadísticas detalladas', 'details': str(e)}), 500
 
 # ===================================
 # INICIALIZACIÓN

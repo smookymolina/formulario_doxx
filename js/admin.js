@@ -108,10 +108,8 @@ async function loadDashboard() {
 
     } catch (error) {
         console.error('Error cargando dashboard:', error);
-        document.getElementById('ultimasRespuestas').innerHTML =
-            `<p style="text-align:center;color:#dc3545;">❌ Error al cargar datos: ${error.message}</p>`;
-        document.getElementById('topActividades').innerHTML =
-            `<p style="text-align:center;color:#dc3545;">❌ Error al cargar datos</p>`;
+        document.getElementById('dashboard').innerHTML =
+            `<p style="text-align:center;color:#dc3545;">❌ Error al cargar el dashboard: ${error.message}</p>`;
     }
 }
 
@@ -620,6 +618,8 @@ function initGeneralMap(respuestas) {
 // ===================
 
 async function loadAndRenderDetailedStats() {
+    const container = document.getElementById('statsContent');
+    container.innerHTML = '<div class="loading"><div class="spinner"></div>Cargando estadísticas...</div>';
     try {
         const response = await fetch(`${API_URL}/admin/statistics`);
         const data = await response.json();
@@ -628,7 +628,7 @@ async function loadAndRenderDetailedStats() {
 
     } catch (error) {
         console.error('Error cargando estadísticas detalladas:', error);
-        document.getElementById('statsContent').innerHTML = `<p style="text-align:center;color:#dc3545;">❌ Error al cargar estadísticas: ${error.message}</p>`;
+        container.innerHTML = `<p style="text-align:center;color:#dc3545;">❌ Error al cargar estadísticas: ${error.message}</p>`;
     }
 }
 
@@ -675,7 +675,10 @@ function createChart(canvasId, type, data, labelKey, dataKey, label, formatter) 
                     'rgba(255, 193, 7, 0.7)',
                     'rgba(220, 53, 69, 0.7)',
                     'rgba(23, 162, 184, 0.7)',
-                    'rgba(253, 126, 20, 0.7)'
+                    'rgba(253, 126, 20, 0.7)',
+                    'rgba(52, 58, 64, 0.7)',
+                    'rgba(108, 117, 125, 0.7)',
+                    'rgba(248, 249, 250, 0.7)'
                 ],
                 borderColor: [
                     'rgba(102, 126, 234, 1)',
@@ -684,7 +687,10 @@ function createChart(canvasId, type, data, labelKey, dataKey, label, formatter) 
                     'rgba(255, 193, 7, 1)',
                     'rgba(220, 53, 69, 1)',
                     'rgba(23, 162, 184, 1)',
-                    'rgba(253, 126, 20, 1)'
+                    'rgba(253, 126, 20, 1)',
+                    'rgba(52, 58, 64, 1)',
+                    'rgba(108, 117, 125, 1)',
+                    'rgba(248, 249, 250, 1)'
                 ],
                 borderWidth: 1
             }]
@@ -788,7 +794,7 @@ function logout() {
         // Usar el sistema de autenticación para cerrar sesión
         window.authSystem.logout();
         // Redirigir al formulario principal
-        window.location.href = 'index_modular.html';
+        window.location.href = 'index.html';
     }
 }
 

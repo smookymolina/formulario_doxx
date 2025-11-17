@@ -7,7 +7,6 @@
 
     <!-- CSS externo -->
     <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="css/notifications.css">
 </head>
 <body>
     <div class="container">
@@ -27,30 +26,34 @@
         </div>
 
         <div class="content">
-            <!-- PASO 1: Aviso de Privacidad y Permisos -->
-            <div class="step active" id="step1">
-                <div class="step-indicator">Paso 1 de 5</div>
-                <div class="alert-box">
-                    <div class="icon">📹 📍</div>
-                    <h3>Aviso Importante: Permisos Requeridos</h3>
-                    <p>
-                        Para continuar con este formulario, necesitamos tu autorizacin para:
-                    </p>
-                    <ul>
-                        <li><strong>Cmara:</strong> Se grabar un video de 5 segundos para verificacin de identidad</li>
-                        <li><strong>Ubicacin GPS:</strong> Se registrar tu ubicacin actual para validar tu asistencia</li>
-                    </ul>
-                    <p style="margin-top: 15px; font-weight: bold;">
-                        Estos datos sern utilizados nicamente para fines del evento de egresados y sern tratados de manera confidencial.
-                    </p>
-                </div>
-                <div class="error-message" id="permissionError"></div>
-                <div class="button-group">
-                    <button class="btn btn-primary" onclick="acceptPermissions()">
-                        Aceptar y Continuar
-                    </button>
-                </div>
-            </div>
+            <!-- PASO 1: Aviso de Privacidad -->
+<div class="step active" id="step1">
+    <div class="step-indicator">Paso 1 de 5</div>
+
+    <div class="alert-box">
+        <div class="icon">📄</div>
+        <h3>Aviso de Privacidad</h3>
+
+        <p>
+            El siguiente formulario tiene como finalidad recabar información necesaria para la
+            organización del evento de egresados. 
+        </p>
+
+        <p style="margin-top: 10px; font-weight: bold;">
+            Los datos proporcionados serán utilizados exclusivamente para este propósito y serán tratados
+            de manera confidencial.
+        </p>
+    </div>
+
+    <div class="error-message" id="permissionError"></div>
+
+    <div class="button-group">
+        <button class="btn btn-primary" onclick="acceptPermissions()">
+            Aceptar y Continuar
+        </button>
+    </div>
+</div>
+
 
             <!-- PASO 3: Datos Personales -->
             <div class="step" id="step3">
@@ -239,7 +242,6 @@
     </div>
 
     <!-- JavaScript externo -->
-    <script src="js/notifications.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>
