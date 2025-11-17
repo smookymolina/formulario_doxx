@@ -420,5 +420,5 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function openAdminPanel() {
-    window.open('admin.html', '_blank');
+    window.location.href = 'admin.html';
 }

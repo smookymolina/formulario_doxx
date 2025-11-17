@@ -17,8 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Verificar autenticación usando el sistema de auth
     if (!window.authSystem.authenticate()) {
-        window.location.href = 'index_modular.html';
-        return;
+        window.location.href = 'index.html';
     }
 
     // Cargar datos iniciales
@@ -39,8 +38,7 @@ function showPage(pageName) {
     // Verificar autenticación antes de navegar
     if (!window.authSystem.isAuthenticated()) {
         alert('⏰ Tu sesión ha expirado');
-        window.location.href = 'index_modular.html';
-        return;
+        window.location.href = 'index.html';
     }
 
     // Ocultar todas las páginas y botones

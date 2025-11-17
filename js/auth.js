@@ -118,7 +118,7 @@ class AuthSystem {
         setInterval(() => {
             if (!this.isAuthenticated() && window.location.pathname.includes('admin')) {
                 alert('⏰ Tu sesión ha expirado. Por favor, inicia sesión nuevamente.');
-                window.location.href = 'index_modular.html';
+                window.location.href = 'index.html';
             }
         }, 60000); // Verificar cada minuto
     }
