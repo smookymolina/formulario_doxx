@@ -60,6 +60,10 @@ def init_db():
     else:
         print(f"Base de datos ya existe en: {DATABASE_PATH}")
 
+# Asegurar que la base de datos exista incluso si la app se ejecuta con `flask run`
+if not DATABASE_PATH.exists():
+    init_db()
+
 def calculate_file_hash(file_data, algorithm='md5'):
     """Calcular hash de un archivo"""
     hash_obj = hashlib.new(algorithm)
@@ -372,6 +376,72 @@ def health_check():
 # ===================================
 # PANEL DE ADMINISTRACIÓN - ENDPOINTS
 # ===================================
+
+
+
+@app.route('/api/admin/dashboard', methods=['GET'])
+def get_admin_dashboard():
+    """Obtener los datos agregados para el panel principal del admin"""
+    conn = None
+    try:
+        conn = get_db()
+        cursor = conn.cursor()
+
+        cursor.execute('SELECT COUNT(*) as total FROM respuestas')
+        total_respuestas = cursor.fetchone()['total'] or 0
+
+        cursor.execute("""
+            SELECT COUNT(*) as total
+            FROM respuestas
+            WHERE DATE(created_at) = DATE('now', 'localtime')
+        """)
+        respuestas_hoy = cursor.fetchone()['total'] or 0
+
+        cursor.execute('SELECT AVG(duracion_total_segundos) as promedio FROM respuestas')
+        promedio = cursor.fetchone()['promedio']
+        tiempo_promedio = promedio if promedio is not None else 0
+
+        cursor.execute("""
+            SELECT programa, COUNT(*) as count
+            FROM respuestas
+            GROUP BY programa
+            ORDER BY count DESC
+        """)
+        por_programa = [dict(row) for row in cursor.fetchall()]
+
+        cursor.execute("""
+            SELECT id, nombre, programa, created_at
+            FROM respuestas
+            ORDER BY created_at DESC
+            LIMIT 5
+        """)
+        ultimas_respuestas = [dict(row) for row in cursor.fetchall()]
+
+        cursor.execute("""
+            SELECT actividad, COUNT(*) as count
+            FROM actividades_seleccionadas
+            GROUP BY actividad
+            ORDER BY count DESC
+            LIMIT 5
+        """)
+        actividades_top = [dict(row) for row in cursor.fetchall()]
+
+        return jsonify({
+            'total_respuestas': total_respuestas,
+            'respuestas_hoy': respuestas_hoy,
+            'tiempo_promedio': tiempo_promedio,
+            'por_programa': por_programa,
+            'ultimas_respuestas': ultimas_respuestas,
+            'actividades_top': actividades_top
+        }), 200
+
+    except Exception as e:
+        print(f"Error en get_admin_dashboard: {str(e)}")
+        return jsonify({'error': 'Error al obtener el dashboard', 'details': str(e)}), 500
+    finally:
+        if conn:
+            conn.close()
+
 
 @app.route('/api/admin/respuestas', methods=['GET'])
 def get_all_respuestas():
